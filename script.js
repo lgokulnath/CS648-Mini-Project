@@ -100,9 +100,9 @@ class Circle {
     // }
 }
 
-
+// O(n^3) brute force algo
 function bruteForceSEC(points) {
-    console.log(points.length);
+    //console.log(points.length);
     if (points.length < 2) return new Circle(new Point(0,0),0);
     // const p0 = points[0];
     // const p1 = points[1];
@@ -154,7 +154,7 @@ function bruteForceSEC(points) {
             if (flag == 1 && sec.radius > currentSec.radius+eps) {
                 // sec found
                 sec = currentSec;
-                console.log('sec modified');
+                //console.log('sec modified');
             }
             // else {
             //     // sec was not found
@@ -166,6 +166,77 @@ function bruteForceSEC(points) {
     }
     return sec;
 
+}
+
+
+// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+// equivalent to random permutation
+function randomShuffle(a) {
+    const n = a.length;
+    for(let i=n-1; i >= 1; i--) {
+        const j = Math.floor(Math.random() * (i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+
+}
+
+function checkPointOutsideCircle(circle, point) {
+    const center = circle.center;
+    const radius = circle.radius;
+
+    if(Point.distance(point, center) >= radius+eps) {
+        return true;
+    }
+    return false;
+}
+
+function _randomizedSEC2(points, p0, p1) {
+    let circle = Circle.diameterPoints(p0, p1);
+    for(let i=0; i<points.length; i++)  {
+        if(checkPointOutsideCircle(circle, points[i])) {
+            circle = Circle.threePointCirle(points[i], p0, p1);
+        }
+    }
+    return circle;
+
+    
+}
+
+function _randomizedSEC1(points, point) {
+    let shuffledPoints = randomShuffle(points);
+
+    let circle = Circle.diameterPoints(point, shuffledPoints[0]);
+
+    for(let i=1; i < points.length; i++) {
+        const pi = shuffledPoints[i];
+        if (checkPointOutsideCircle(circle, pi)) {
+            circle = _randomizedSEC2(shuffledPoints.slice(0, i) ,point, pi);
+        }
+
+    }
+    return circle;
+
+}
+
+// randomized O(n) expected runtime algo
+function randomizedSEC(points) {
+    let shuffledPoints = randomShuffle(points);
+
+    const p0 = shuffledPoints[0], p1 = shuffledPoints[1];
+
+    let sec = Circle.diameterPoints(p0, p1);
+    for(let i = 2; i < shuffledPoints.length; i++) {
+        const p2 = shuffledPoints[i];
+        if (checkPointOutsideCircle(sec, p2)) {
+            // outside
+            sec = _randomizedSEC1(shuffledPoints.slice(0, i), p2);
+        }
+        else {
+            continue;
+        }
+    }
+    return sec;
 }
 
 function clearCanvas() {
@@ -188,28 +259,51 @@ function clearCanvas() {
 //     // Add more points as needed
 // ];
 
-const minX = 205, minY = 205, maxX = 395, maxY = 295;
+
+var minX = Math.floor(Math.random()*500) + 105, minY = 105, maxX = minX + 300, maxY = 395;
+
+var bruteForceSECRuntime = document.getElementById('bruteForceSECRuntime');bruteForceSECRuntime
+var randmizedSECRuntime = document.getElementById('randomizedSECRuntime');
 
 // Get canvas element and its context
 const canvas = document.getElementById('canvas');
+const rect = canvas.getBoundingClientRect();
+
+console.log('width: ', rect.width);
+console.log('height: ', rect.height);
 const ctx = canvas.getContext('2d');
 
 function genPointsAndSEC() {
-
-
-
+    minX = Math.floor(Math.random()*500) + 105;
+    maxX = minX + 300;
+    resetCanvas();
+    var numPoints = parseInt(document.getElementById('numPoints').value);
+    console.log('read numpoints as ');
+    console.log(numPoints);
     let points = [];
 
-    for(let i=1; i <= 10; i++) {
+    for(let i=1; i <= numPoints; i++) {
         points.push(Point.getRandomPoint(minX, maxX, minY, maxY));
     }
 
-
-    const c2 = bruteForceSEC(points);
-
+    var startTime = performance.now();
+    const c2 = randomizedSEC(points);
+    var endTime = performance.now();
+    var runtime = endTime - startTime;
+    randmizedSECRuntime.value = runtime.toString() + ' ms';
+    console.log(runtime);
+    console.log('Runtime for randmized SEC: ', runtime);
+   // console.log(runtime);
+    startTime = performance.now();
+    const c3 = bruteForceSEC(points);
+    endTime = performance.now();
+    runtime = endTime-startTime;
+    bruteForceSECRuntime.value = runtime.toString() + ' ms';
+    console.log('Runtime for brute force SEC: ', runtime);
+    //console.log(runtime);
     // console.log(c1.center);
     // console.log(c1.radius);
-
+    console.log('center and radius of circle as below');
     console.log(c2.center);
     console.log(c2.radius);
 

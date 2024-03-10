@@ -7,15 +7,38 @@
 <style>
   canvas {
     border: 1px solid black;
+    /* width: 90vw;
+    height: 80vh; */
+    /* align-content: center; */
   }
+#bruteForceSECRuntime {
+      background-color: #d3d3d3; /* Light gray background */
+      color: #888; /* Gray text color */
+    }
+    #randomizedSECRuntime {
+      background-color: #d3d3d3; /* Light gray background */
+      color: #888; /* Gray text color */
+    }
 </style>
 </head>
 <body>
-<canvas id="canvas" width="800" height="600"></canvas>
+<center>
+<canvas id="canvas" width="1000" height="450"></canvas>
+<!-- </center> -->
 <div>
+    <label for="textBox">Enter No of Points (min 2, max 100):</label>
+    <input type="text" id="numPoints" name="textBox" value="20">
     <button onclick="genPointsAndSEC()">Generate Points & SEC</button>
     <button onclick="clearCanvas()">Reset</button>
 </div>
+<br>
+<div>
+  <label for="textBox">Runtime of brute force SEC: </label>
+  <input type="text" value="0s" id="bruteForceSECRuntime" readonly> <br><br>
+  <label for="textBox">Runtime of randomized SEC: </label>
+  <input type="text" value="0s" id="randomizedSECRuntime" readonly> <br>
+</div>
+</center>
 </body>
 <script src="script.js"></script>
 </html>
