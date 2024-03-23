@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Move Point with Mouse</title>
+<style>
+    canvas {
+        border: 1px solid black;
+    }
+</style>
+</head>
+<body>
+<canvas id="myCanvas" width="400" height="400"></canvas>
+<script>
+    // Get the canvas element and its context
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+
+    // Define the initial position of the point
+    var point = { x: canvas.width / 2, y: canvas.height / 2 };
+
+    // Function to draw the point
+    function drawPoint() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "red";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // Function to update the position of the point when mouse moves
+    function updatePointPosition(event) {
+        var rect = canvas.getBoundingClientRect();
+        point.x = event.clientX - rect.left;
+        point.y = event.clientY - rect.top;
+        drawPoint();
+    }
+
+    // Event listener to call the updatePointPosition function when mouse moves
+    canvas.addEventListener("mousemove", updatePointPosition);
+
+    // Initial draw of the point
+    drawPoint();
+</script>
+</body>
+</html>

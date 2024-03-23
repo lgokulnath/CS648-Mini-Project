@@ -269,18 +269,42 @@ var randmizedSECRuntime = document.getElementById('randomizedSECRuntime');
 const canvas = document.getElementById('canvas');
 const rect = canvas.getBoundingClientRect();
 
+var points = [];
+
 console.log('width: ', rect.width);
 console.log('height: ', rect.height);
 const ctx = canvas.getContext('2d');
 
+
+function getClickPosition(e) {
+    var p = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    }
+    console.log('Point: ');
+    console.log(p.x, p.y);
+    drawAt(p);
+    return p;
+}
+
+function drawAt(point) {
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+
+
+
+
 function genPointsAndSEC() {
     minX = Math.floor(Math.random()*500) + 105;
     maxX = minX + 300;
-    resetCanvas();
+    //resetCanvas();
     var numPoints = parseInt(document.getElementById('numPoints').value);
     console.log('read numpoints as ');
     console.log(numPoints);
-    let points = [];
+    //let points = [];
 
     for(let i=1; i <= numPoints; i++) {
         points.push(Point.getRandomPoint(minX, maxX, minY, maxY));
@@ -325,7 +349,58 @@ function genPointsAndSEC() {
 
 }
 
+function genSEC() {
+    console.log('Printing points....');
+    console.log(points);
+    var startTime = performance.now();
+    const c2 = randomizedSEC(points);
+    var endTime = performance.now();
+    var runtime = endTime - startTime;
+    randmizedSECRuntime.value = runtime.toString() + ' ms';
+    console.log(runtime);
+    console.log('Runtime for randmized SEC: ', runtime);
+   // console.log(runtime);
+    startTime = performance.now();
+    const c3 = bruteForceSEC(points);
+    endTime = performance.now();
+    runtime = endTime-startTime;
+    bruteForceSECRuntime.value = runtime.toString() + ' ms';
+    console.log('Runtime for brute force SEC: ', runtime);
+    //console.log(runtime);
+    // console.log(c1.center);
+    // console.log(c1.radius);
+    console.log('center and radius of circle as below');
+    console.log(c2.center);
+    console.log(c2.radius);
+
+    
+
+    
+
+    // Draw enclosing circle
+    ctx.strokeStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(c2.center.x, c2.center.y, c2.radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+}
+
+function addManualPoints() {
+    //points = [];
+    document.getElementById("canvas").addEventListener('click', function(e) {
+        console.log('click detected');
+        var point = getClickPosition(e);
+        drawAt(point);
+        points.push(point);
+    })
+    
+
+}
+
 function resetCanvas() {
+    points.length = 0;
+    console.log('reset function');
+    console.log(points);
     clearCanvas();
 }
 
