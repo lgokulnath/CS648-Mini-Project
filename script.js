@@ -1,14 +1,17 @@
 const eps = 1e-6;
 
 const point_radius = 3;
-var minX = Math.floor(Math.random()*500) + 105, minY = 105, maxX = minX + 300, maxY = 395;
+
 
 var bruteForceSECRuntime = document.getElementById('bruteForceSECRuntime');bruteForceSECRuntime
 var randmizedSECRuntime = document.getElementById('randomizedSECRuntime');
 
 // Get canvas element and its context
 const canvas = document.getElementById('canvas');
-const rect = canvas.getBoundingClientRect();
+
+// const rect = canvas.getBoundingClientRect();
+
+var minX, maxX, minY, maxY;
 
 var points = [];
 var isDragging = false;
@@ -95,6 +98,8 @@ class Circle {
         return new Circle(centerPoint, radius);
     }
 }
+
+//------------------------------------------------Algorithms---------------------------------------------------------
 
 // O(n^3) brute force algo
 function bruteForceSEC(points) {
@@ -205,15 +210,23 @@ function randomizedSEC(points) {
     return sec;
 }
 
+//-----------------------------------------------------------canvas manipulations--------------------------------------------------------------------------------
+
+
+
 function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
 
-console.log('width: ', rect.width);
-console.log('height: ', rect.height);
 const ctx = canvas.getContext('2d');
+ctx.canvas.width = .8*window.innerWidth;
+ctx.canvas.height = .8*window.innerHeight;
+console.log('width: ', canvas.width, ctx.canvas.width);
+console.log('height: ', canvas.height);
 
+var minY = canvas.height*.1,  maxY = canvas.height*.9;
+const rect = canvas.getBoundingClientRect();
 
 function getClickPosition(e) {
     var p = {
@@ -235,8 +248,12 @@ function drawAt(point) {
   }  
 
 function generateRandomPoints() {
-    minX = Math.floor(Math.random()*500) + 105;
-    maxX = minX + 300;
+    console.log('width: ', canvas.width);
+    console.log('height: ', canvas.height);
+    
+    var minX = Math.floor(Math.random()*canvas.width*.75) ;
+    var maxX = minX + canvas.width*.25;
+    console.log('minX, maxX, minY, maxY', minX, maxX, minY, maxY);
     //resetCanvas();
     var numPoints = parseInt(document.getElementById('numPoints').value);
     console.log('read numpoints as ');
@@ -250,7 +267,7 @@ function generateRandomPoints() {
     ctx.fillStyle = 'blue';
     points.forEach(point => {
     ctx.beginPath();
-    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, point_radius, 0, Math.PI * 2);
     ctx.fill();
     });
 }
@@ -262,7 +279,7 @@ function genSEC() {
     ctx.fillStyle = 'blue';
     points.forEach(point => {
     ctx.beginPath();
-    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, point_radius, 0, Math.PI * 2);
     ctx.fill();
     });
 
@@ -299,7 +316,7 @@ function genSEC() {
 
 function addManualPoints() {
     //points = [];
-    document.getElementById("canvas").addEventListener('click', function(e) {
+    canvas.addEventListener('click', function(e) {
         console.log('click detected');
         var point = getClickPosition(e);
         drawAt(point);
@@ -339,6 +356,7 @@ function drawPoint(x, y) {
 
 // Function to handle mouse down event
 canvas.addEventListener('mousedown', function(e) {
+    console.log('mousedown triggered... ');
     var rect = canvas.getBoundingClientRect();
     var mouseX = e.clientX - rect.left;
     var mouseY = e.clientY - rect.top;
