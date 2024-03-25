@@ -1,0 +1,6 @@
+For generating the data for tables in the report (LATEX), follow these steps:
+
+1. Execute the script "table_1_2_data.sh"
+    - Check the arguments to be passed namely, the list of n (the number of points), and the number of samples to be generated
+    for each value of n
+2. Run the file table_1.py and the appropriate statistics will be printed on the terminal
