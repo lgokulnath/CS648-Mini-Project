@@ -1,30 +1,38 @@
-// data types in js
-// Numbers:
-// let length = 16;
-// let weight = 7.5;
-
-// // Strings:
-// let color = "Yellow";
-// let lastName = "Johnson";
-
-// // Booleans
-// let x = true;
-// let y = false;
-
-// // Object:
-// const person = {firstName:"John", lastName:"Doe"};
-
-// // Array object:
-// const cars = ["Saab", "Volvo", "BMW"];
-
-// // Date object:
-// const date = new Date("2022-03-25");
-
-
 const eps = 1e-6;
 
+const point_radius = 3;
+var minX = Math.floor(Math.random()*500) + 105, minY = 105, maxX = minX + 300, maxY = 395;
 
-// credit for point class: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
+var bruteForceSECRuntime = document.getElementById('bruteForceSECRuntime');bruteForceSECRuntime
+var randmizedSECRuntime = document.getElementById('randomizedSECRuntime');
+
+// Get canvas element and its context
+const canvas = document.getElementById('canvas');
+const rect = canvas.getBoundingClientRect();
+
+var points = [];
+var isDragging = false;
+var moving_point_x = 0;
+var moving_point_y = 0;
+var moving_point_idx = 0;
+
+
+// some utility functions
+
+// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+// equivalent to random permutation
+function randomShuffle(a) {
+    const n = a.length;
+    for(let i=n-1; i >= 1; i--) {
+        const j = Math.floor(Math.random() * (i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+
+}
+
+
+// credit: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
 class Point {
     constructor(x, y) {
       this.x = x;
@@ -45,11 +53,7 @@ class Point {
     }
 }
 
-// function three_determinant(matrix) {
-//     // input: 2d array of size 3x3
-//     // out: determinant
-//     const det = matrix[0][0] * (matrix[1][1]*matrix[2][2]-matrix[1][2]*matrix[2][1]) + matrix[0][1]*(matrix[1][2]*matrix[2][0] -  matrix[1][0]*matrix[2][2]) + matrix[0][2] * (matrix[1][0]*matrix[2][1] - matrix[1][1]*matrix[2][0]);
-// }
+
 
 class Circle {
     constructor(center, radius) {
@@ -90,31 +94,12 @@ class Circle {
         const radius = Point.distance(centerPoint, p3);
         return new Circle(centerPoint, radius);
     }
-
-    // static smallestEnclosingCircle(points) {
-    //     if (points.length < 2) return new Circle(new Point(0,0),0);
-    //     const p0 = points[0];
-    //     const p1 = points[1];
-
-
-    // }
 }
 
 // O(n^3) brute force algo
 function bruteForceSEC(points) {
     //console.log(points.length);
     if (points.length < 2) return new Circle(new Point(0,0),0);
-    // const p0 = points[0];
-    // const p1 = points[1];
-
-    // let circle = Circle.diameterPoints(p0, p1);
-
-    // for(let i=2; i<points.length; i++) {
-    //     const pi = points[i];
-    //     if (Point.distance(circle.center, pi) < circle.radius) {
-    //         circle = Circle.threePointCirle()
-    //     }
-    // }
 
     let sec = new Circle(new Point(0,0), maxX);
 
@@ -136,9 +121,7 @@ function bruteForceSEC(points) {
                     currentSec = Circle.threePointCirle(p0, p1, p2);
                 }
             }
-            // console.log('Logging current sec:');
-            // console.log(currentSec.center);
-            // console.log(currentSec.radius);
+           
             let flag = 1;
             for(let k=0; k < points.length; k++) {
                 const p2 = points[k];
@@ -156,28 +139,11 @@ function bruteForceSEC(points) {
                 sec = currentSec;
                 //console.log('sec modified');
             }
-            // else {
-            //     // sec was not found
-            // }
-
-
+         
         }
         
     }
     return sec;
-
-}
-
-
-// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-// equivalent to random permutation
-function randomShuffle(a) {
-    const n = a.length;
-    for(let i=n-1; i >= 1; i--) {
-        const j = Math.floor(Math.random() * (i+1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
 
 }
 
@@ -244,33 +210,6 @@ function clearCanvas() {
 }
 
 
-
-
-// const p1 = new Point(0, 0);
-// const p2 = new Point(4, 0);
-// const p3 = new Point(2, 2);
-// const c1 = Circle.threePointCirle(p1, p2, p3);
-
-// Create an array of points
-// const points = [
-//     new Point(2, 2),
-//     new Point(402, 2),
-//     new Point(202, 202),
-//     // Add more points as needed
-// ];
-
-
-var minX = Math.floor(Math.random()*500) + 105, minY = 105, maxX = minX + 300, maxY = 395;
-
-var bruteForceSECRuntime = document.getElementById('bruteForceSECRuntime');bruteForceSECRuntime
-var randmizedSECRuntime = document.getElementById('randomizedSECRuntime');
-
-// Get canvas element and its context
-const canvas = document.getElementById('canvas');
-const rect = canvas.getBoundingClientRect();
-
-var points = [];
-
 console.log('width: ', rect.width);
 console.log('height: ', rect.height);
 const ctx = canvas.getContext('2d');
@@ -289,15 +228,13 @@ function getClickPosition(e) {
 
 function drawAt(point) {
     ctx.beginPath();
-    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = 'blue';
+    ctx.arc(point.x, point.y, point_radius, 0, Math.PI * 2);
+    
     ctx.fill();
-  }
-  
+  }  
 
-
-
-
-function genPointsAndSEC() {
+function generateRandomPoints() {
     minX = Math.floor(Math.random()*500) + 105;
     maxX = minX + 300;
     //resetCanvas();
@@ -309,30 +246,18 @@ function genPointsAndSEC() {
     for(let i=1; i <= numPoints; i++) {
         points.push(Point.getRandomPoint(minX, maxX, minY, maxY));
     }
+    // Draw points
+    ctx.fillStyle = 'blue';
+    points.forEach(point => {
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+    });
+}
 
-    var startTime = performance.now();
-    const c2 = randomizedSEC(points);
-    var endTime = performance.now();
-    var runtime = endTime - startTime;
-    randmizedSECRuntime.value = runtime.toString() + ' ms';
-    console.log(runtime);
-    console.log('Runtime for randmized SEC: ', runtime);
-   // console.log(runtime);
-    startTime = performance.now();
-    const c3 = bruteForceSEC(points);
-    endTime = performance.now();
-    runtime = endTime-startTime;
-    bruteForceSECRuntime.value = runtime.toString() + ' ms';
-    console.log('Runtime for brute force SEC: ', runtime);
-    //console.log(runtime);
-    // console.log(c1.center);
-    // console.log(c1.radius);
-    console.log('center and radius of circle as below');
-    console.log(c2.center);
-    console.log(c2.radius);
 
-    
-
+function genSEC() {
+    clearCanvas();
     // Draw points
     ctx.fillStyle = 'blue';
     points.forEach(point => {
@@ -341,15 +266,6 @@ function genPointsAndSEC() {
     ctx.fill();
     });
 
-    // Draw enclosing circle
-    ctx.strokeStyle = 'red';
-    ctx.beginPath();
-    ctx.arc(c2.center.x, c2.center.y, c2.radius, 0, Math.PI * 2);
-    ctx.stroke();
-
-}
-
-function genSEC() {
     console.log('Printing points....');
     console.log(points);
     var startTime = performance.now();
@@ -372,10 +288,6 @@ function genSEC() {
     console.log('center and radius of circle as below');
     console.log(c2.center);
     console.log(c2.radius);
-
-    
-
-    
 
     // Draw enclosing circle
     ctx.strokeStyle = 'red';
@@ -403,6 +315,60 @@ function resetCanvas() {
     console.log(points);
     clearCanvas();
 }
+// ------------------Event listeners--------------------------------------
+
+
+// Function to draw the point
+function drawPoint(x, y) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //ctx.beginPath();
+    points[moving_point_idx].x = x;
+    points[moving_point_idx].y = y;
+    // Draw points
+    ctx.fillStyle = 'blue';
+    points.forEach(point => {
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+    });
+    // ctx.arc(x, y, point_radius, 0, Math.PI * 2);
+    // ctx.fillStyle = 'blue';
+    // ctx.fill();
+    // ctx.closePath();
+}
+
+// Function to handle mouse down event
+canvas.addEventListener('mousedown', function(e) {
+    var rect = canvas.getBoundingClientRect();
+    var mouseX = e.clientX - rect.left;
+    var mouseY = e.clientY - rect.top;
+    for(let i = 0; i < points.length; i++) {
+        // Check if the mouse is over the point
+        const point = points[i];
+        var distance = Math.sqrt(Math.pow(mouseX - point.x, 2) + Math.pow(mouseY - point.y, 2));
+        if (distance <= 2*point_radius) {
+            isDragging = true;
+            moving_point_x = point.x;
+            moving_point_y = point.y;
+            moving_point_idx = i;
+        }
+    }
+});
+
+// Function to handle mouse move event
+canvas.addEventListener('mousemove', function(e) {
+    if (isDragging) {
+        var rect = canvas.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        drawPoint(x, y);
+    }
+});
+
+// Function to handle mouse up event
+canvas.addEventListener('mouseup', function() {
+    isDragging = false;
+});
 
 
 
