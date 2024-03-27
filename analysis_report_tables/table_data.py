@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import math
+from sklearn.linear_model import LinearRegression
 
 df = pd.read_csv("data_report_tables/data_table_sec.csv", header=None)
 df2 = pd.read_csv("data_report_tables/data_table_3.csv", header=None)
@@ -130,18 +131,40 @@ freqs_5000 = (freqs_5000/n_samples)*100
 freqs_10000 = (freqs_10000/n_samples)*100
 freqs_50000 = (freqs_50000/n_samples)*100
 
-# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_500), color='r', label='N = 500')
-# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_1000), color='b', label="N = 1000")
-# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_2000), color='g', label="N = 2000")
-# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_5000), color='yellow', label='N = 5000')
-# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_10000), color='black', label="N = 10000")
-plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_50000), color='grey', label="N = 50000")
+# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_500), color='r', label='N = 500')
+# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_1000), color='b', label="N = 1000")
+# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_2000), color='g', label="N = 2000")
+# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_5000), color='yellow', label='N = 5000')
+# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_10000), color='black', label="N = 10000")
+# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_50000), color='grey', label="N = 50000")
+# plt.xlabel('Average exceeded by (%)')
+# plt.ylabel('Percentage of all the samples')
+# plt.title('Percentage of samples exceeding the average runtime by a certain amount')
+# plt.legend()
+# plt.savefig('plots/avg_exceed_scatter_50000_n.png')
+
+
+
+# Trying to fit y = e^A * e^(Bx)
+X_train = np.arange(1, max_exceedance+1)
+y = freqs_5000
+regr = np.polyfit(X_train, np.log(y), 1, w=np.sqrt(y))
+A = regr[1]
+B = regr[0]
+# regr = LinearRegression()
+# regr.fit(X_train, y_train)
+# B = -1*regr.coef_
+# A = math.exp(regr.intercept_)
+ys = math.exp(A)*np.exp(B*X_train)
+
+# print(f'Coefficient: {regr.coef_}, Intercept: {regr.intercept_}')
+plt.scatter(np.arange(1, max_exceedance+1), np.array(y), color='green', label="N = 5000")
+plt.plot(X_train, ys, color='red', label=f'Best fit : A={round(A, 2)}, B={round(B, 2)}')
 plt.xlabel('Average exceeded by (%)')
 plt.ylabel('Percentage of all the samples')
 plt.title('Percentage of samples exceeding the average runtime by a certain amount')
 plt.legend()
-plt.savefig('plots/avg_exceed_50000_n.png')
-
+plt.savefig('plots/avg_exceed_fit_5000_n.png')
 # print('-----------------------------------------------------')
 # n_samples = 25
 # num_batches = len(df2) // n_samples
