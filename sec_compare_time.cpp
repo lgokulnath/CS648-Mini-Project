@@ -13,6 +13,9 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::Point_2 Point_2;
 typedef CGAL::Min_circle_2_traits_2<K> Traits;
 typedef CGAL::Min_circle_2<Traits> Min_circle;
+typedef K::Segment_2 Segment_2;
+typedef K::Circle_2 Circle_2;
+typedef K::Bounded_side Bounded_side;
 
 struct Circle
 {
@@ -78,17 +81,6 @@ Circle welzl(const std::vector<Point_2> &P)
 
 
 
-
-
-
-
-
-
-typedef CGAL::Simple_cartesian<double> Kernel;
-// typedef Kernel::Point_2 Point_2;
-typedef Kernel::Segment_2 Segment_2;
-typedef Kernel::Circle_2 Circle_2;
-typedef Kernel::Bounded_side Bounded_side;
 
 
 Circle_2 sec2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n)
@@ -215,7 +207,7 @@ int main(int argc, char *argv[])
 
 
     start = std::chrono::steady_clock::now();
-    Circle_2 sec = sec(points);
+    Circle_2 mec_sec = sec(points);
     end = std::chrono::steady_clock::now();
     std::chrono::duration<double> sec_time = end - start;
 
@@ -229,8 +221,8 @@ int main(int argc, char *argv[])
     std::cout << "Welzl Algorithm: Center = { " << mec_welzl.C.x() << ", " << mec_welzl.C.y()
               << " } Radius = " << mec_welzl.R << " Time = " << welzl_time.count() << " seconds" << std::endl;
 
-    std::cout << "Sec Algorithm: Center = { " << sec.center()
-              << " } Radius = " << std::sqrt(CGAL::to_double(sec.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
+    std::cout << "Sec Algorithm: Center = { " << mec_sec.center()
+              << " } Radius = " << std::sqrt(CGAL::to_double(mec_sec.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
 
     std::cout << "Min Circle Algorithm: Center = { " << mec_min_circle.C.x() << ", " << mec_min_circle.C.y()
               << " } Radius = " << mec_min_circle.R << " Time = " << min_circle_time.count() << " seconds" << std::endl;
