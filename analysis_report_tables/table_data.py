@@ -24,7 +24,7 @@ for i in range(num_batches):
 
 print('-----------------------------------------------------')
 
-table_2_n_values = [10, 100, 200, 500, 1000, 2000]
+table_2_n_values = [10, 100, 200, 500, 1000, 2000, 5000, 10000, 50000]
 
 x_1, x_2, x_3, x_4 = 1.1, 1.2, 1.5, 2
 
@@ -59,7 +59,7 @@ print('-----------------------------------------------------')
 
 
 # Following code plots the number of samples (out of 1000) as a function of how much it exceeds the average
-max_exceedance = 400
+max_exceedance = 500
 freqs_500, freqs_1000, freqs_2000, freqs_5000, freqs_10000, freqs_50000 = [0]*max_exceedance, [0]*max_exceedance, [0]*max_exceedance, [0]*max_exceedance, [0]*max_exceedance, [0]*max_exceedance
 n_samples = 1000
 required_n = [500, 1000, 2000, 5000, 10000, 50000]
@@ -94,7 +94,7 @@ for i in range(num_batches):
             freqs_50000[rem]+=1
 
     print(f'n: {n_points}, avg_time: {avg_time}')
-    print(f'Fraction of runtime samples exceeding the average by {round((x_1-1)*100)}%: {(cnt_1/n_samples)*100}, {round((x_2-1)*100)}%: {(cnt_2/n_samples)*100}, {round((x_3-1)*100)}%: {(cnt_3/n_samples)*100}, {round((x_4-1)*100)}%: {(cnt_4/n_samples)*100}')
+    # print(f'Fraction of runtime samples exceeding the average by {round((x_1-1)*100)}%: {(cnt_1/n_samples)*100}, {round((x_2-1)*100)}%: {(cnt_2/n_samples)*100}, {round((x_3-1)*100)}%: {(cnt_3/n_samples)*100}, {round((x_4-1)*100)}%: {(cnt_4/n_samples)*100}')
 print('-----------------------------------------------------')
 
 
