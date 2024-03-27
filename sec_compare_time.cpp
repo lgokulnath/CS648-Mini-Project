@@ -71,11 +71,11 @@ Circle welzl_helper(std::vector<Point_2> &P,
     return welzl_helper(P, R, n - 1);
 }
 
-Circle welzl(const std::vector<Point_2> &P)
+Circle welzl(std::vector<Point_2> &P)
 {
-    std::vector<Point_2> P_copy = P;
-    std::random_shuffle(P_copy.begin(), P_copy.end());
-    return welzl_helper(P_copy, {}, P_copy.size());
+    // std::vector<Point_2> P_copy = P;
+    std::random_shuffle(P.begin(), P.end());
+    return welzl_helper(P, {}, P.size());
 }
 
 
@@ -100,19 +100,19 @@ Circle_2 sec2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n)
 
 Circle_2 sec1(std::vector<Point_2> &points, int n, Point_2 q)
 {
-  std::vector<Point_2> points_ (points.begin(), points.begin() + n);
+  // std::vector<Point_2> points_ (points.begin(), points.begin() + n);
 
-  auto rng = std::default_random_engine {};
-  std::shuffle(std::begin(points_), std::end(points_), rng);
+  // auto rng = std::default_random_engine {};
+  // std::shuffle(std::begin(points_), std::end(points_), rng);
 
-  Circle_2 c(q, points_[0]);
+ Circle_2 c(q, points[0]);
 
   for(int i = 1; i < n; i++) {
     
-    Point_2 p = points_[i];
+    Point_2 p = points[i];
     Bounded_side s = c.bounded_side(p);
     if(! (s == CGAL::ON_BOUNDED_SIDE || s == CGAL::ON_BOUNDARY)) {
-      c = sec2(p, q, points_, i);
+      c = sec2(p, q, points, i);
     }
 
   }
@@ -199,15 +199,17 @@ int main(int argc, char *argv[])
     {
         points.emplace_back(dis(gen), dis(gen));
     }
+    std::vector<Point_2> points1 = points;
+    std::vector<Point_2> points2 = points;
 
     auto start = std::chrono::steady_clock::now();
-    Circle mec_welzl = welzl(points);
+    Circle mec_welzl = welzl(points1);
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> welzl_time = end - start;
 
 
     start = std::chrono::steady_clock::now();
-    Circle_2 mec_sec = sec(points);
+    Circle_2 mec_sec = sec(points2);
     end = std::chrono::steady_clock::now();
     std::chrono::duration<double> sec_time = end - start;
 
