@@ -1,2 +1,8 @@
+# Ignore all
+*
 a.out
-compare_all_three
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
