@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-df = pd.read_csv("data_report_tables/data_table_1.csv", header=None)
+df = pd.read_csv("data_report_tables/data_table_sec.csv", header=None)
 df2 = pd.read_csv("data_report_tables/data_table_3.csv", header=None)
 
-n_samples = 100
+n_samples = 1000
 
 print('-----------------------------------------------------')
 num_batches = len(df) // n_samples
@@ -56,22 +56,22 @@ for i in range(num_batches):
     print(f'Fraction of runtime samples exceeding the average by {round((x_1-1)*100)}%: {(cnt_1/n_samples)*100}, {round((x_2-1)*100)}%: {(cnt_2/n_samples)*100}, {round((x_3-1)*100)}%: {(cnt_3/n_samples)*100}, {round((x_4-1)*100)}%: {(cnt_4/n_samples)*100}')
 print('-----------------------------------------------------')
 
-print('-----------------------------------------------------')
-n_samples = 25
-num_batches = len(df2) // n_samples
-for i in range(num_batches):
-    start_index = i * n_samples
-    end_index = min((i + 1) * n_samples, len(df2))
-    batch = df2.iloc[start_index:end_index]
-    # Calculate average, standard deviation, and maximum of the values in the first column
+# print('-----------------------------------------------------')
+# n_samples = 25
+# num_batches = len(df2) // n_samples
+# for i in range(num_batches):
+#     start_index = i * n_samples
+#     end_index = min((i + 1) * n_samples, len(df2))
+#     batch = df2.iloc[start_index:end_index]
+#     # Calculate average, standard deviation, and maximum of the values in the first column
 
-    avg_time_welzl = batch.iloc[:, 1].mean()
-    avg_time_cgal = batch.iloc[:, 2].mean()
-    avg_time_det = batch.iloc[:, 3].mean()
+#     avg_time_welzl = batch.iloc[:, 1].mean()
+#     avg_time_cgal = batch.iloc[:, 2].mean()
+#     avg_time_det = batch.iloc[:, 3].mean()
 
-    n_points = batch.iloc[0,0]
-    print(f'n: {n_points}, Average runtime for Welzl: {avg_time_welzl}, Cgal: {avg_time_cgal}, Deterministic: {avg_time_det}')
+#     n_points = batch.iloc[0,0]
+#     print(f'n: {n_points}, Average runtime for Welzl: {avg_time_welzl}, Cgal: {avg_time_cgal}, Deterministic: {avg_time_det}')
 
-print('-----------------------------------------------------')
+# print('-----------------------------------------------------')
 
 # print('------------------------------------------------\n')
