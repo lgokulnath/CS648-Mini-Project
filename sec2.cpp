@@ -78,7 +78,7 @@ Circle_2 sec(std::vector<Point_2> &points)
 
 
 
-int main()
+int main(int argc, char* argv[])
 {
   Point_2 p1(0, 0);
   Point_2 p2(4, 0);
@@ -87,4 +87,31 @@ int main()
   double radius = std::sqrt(CGAL::to_double(c.squared_radius()));
   std::cout << "SEC center = " << c.center() << "\n";
   std::cout << "SEC radius = " << radius << "\n";
+
+    if (argc == 3)
+    {
+        int n_points = std::stoi(argv[1]), n_samples = std::stoi(argv[2]); 
+        int n = n_points;
+        std::ofstream fout("data_report_tables/data_table_sec.csv", std::ios::app);
+        for (int i = 0; i < n_samples; i++)
+        {
+            std::vector<Point_2> points;
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<> dis(-1000.0, 1000.0);
+
+            for (int i = 0; i < n; ++i)
+            {
+                points.emplace_back(dis(gen), dis(gen));
+            }
+
+            auto start = std::chrono::steady_clock::now();
+            Circle_2 _sec = sec(points);
+            auto end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> sec_time = end - start;
+
+            fout<<n<<","<<sec_time.count()<<","<<std::endl;
+        }
+        fout.close();
+    }
 }

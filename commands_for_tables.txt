@@ -1,0 +1,13 @@
+For generating the data for tables in the report (LATEX), follow these steps:
+
+1. Execute the script "table_data_gen.sh"
+    - Check the arguments to be passed namely, the list of n (the number of points), and the number of samples to be generated
+    for each value of n
+    - There are two possible options to run the script, and we need to uncomment the lines appropriately
+    - One option is to generate data for the Tables 1,2
+    - Other is to generate data for the Table 3
+
+2. Run the file table_data.py and the appropriate statistics will be printed on the terminal corresponding to all the three tables
+    - Ensure that there are two files in the data_report_tables directory: data_table_1.csv, data_table_3.csv 
+      before running this python script
+
