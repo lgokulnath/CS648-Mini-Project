@@ -7,7 +7,7 @@ executable="/home/hitesh03/Desktop/Academics/CS648/CS648-Mini-Project/sec2"     
 
 # Define the list of the values of n (number of points)
 # numerical_args=(5 10 20 30 40 50 60 70 80 90 100 200 300 400 500 1000)        #Uncomment this for data related to Table 1,2
-numerical_args=(5 10 20 50 80 100 200 500 1000)          #Uncomment this for data related to Table 3
+numerical_args=(5 10 20 50 80 100 200 500 1000 2000 5000 10000 50000)          #Uncomment this for data related to Table 3
 
 # Fixed numerical argument
 num_samples=1000         #Number of samples to be generated for each value of n
