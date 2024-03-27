@@ -25,19 +25,19 @@ Circle_2 sec2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n)
 
 Circle_2 sec1(std::vector<Point_2> &points, int n, Point_2 q)
 {
-  std::vector<Point_2> points_ (points.begin(), points.begin() + n);
+  //std::vector<Point_2> points_ (points.begin(), points.begin() + n);
 
-  auto rng = std::default_random_engine {};
-  std::shuffle(std::begin(points_), std::end(points_), rng);
+  //auto rng = std::default_random_engine {};
+  //std::shuffle(std::begin(points_), std::end(points_), rng);
 
-  Circle_2 c(q, points_[0]);
+  Circle_2 c(q, points[0]);
 
   for(int i = 1; i < n; i++) {
     
-    Point_2 p = points_[i];
+    Point_2 p = points[i];
     Bounded_side s = c.bounded_side(p);
     if(! (s == CGAL::ON_BOUNDED_SIDE || s == CGAL::ON_BOUNDARY)) {
-      c = sec2(p, q, points_, i);
+      c = sec2(p, q, points, i);
     }
 
   }
