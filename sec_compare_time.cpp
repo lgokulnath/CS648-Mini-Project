@@ -110,16 +110,16 @@ Circle_2 iterative_1(std::vector<Point_2> &points, int n, Point_2 q)
 
 Circle_2 iterative(std::vector<Point_2> &points) 
 {
-  if(points.size() == 0) {
-    return Circle_2(Point_2(0, 0), 0);
-  } 
-  if(points.size() == 1) {
-    return Circle_2(points[0], 0);
-  }
-
-  // if(points.size()<=3){
-  //   return base_case(points);
+  // if(points.size() == 0) {
+  //   return Circle_2(Point_2(0, 0), 0);
+  // } 
+  // if(points.size() == 1) {
+  //   return Circle_2(points[0], 0);
   // }
+
+  if(points.size()<=3){
+    return base_case(points);
+  }
 
   // randomly shuffle the vector of points
   // ref: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
@@ -196,13 +196,13 @@ int main(int argc, char *argv[])
     std::vector<Point_2> points2 = points;
 
     auto start = std::chrono::steady_clock::now();
-    Circle_2 mec_recursive_sec = recursive(points1);
+    Circle_2 mec_recursive = recursive(points1);
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> recursive_sec_time = end - start;
 
 
     start = std::chrono::steady_clock::now();
-    Circle_2 mec_sec = iterative(points2);
+    Circle_2 mec_iterative = iterative(points2);
     end = std::chrono::steady_clock::now();
     std::chrono::duration<double> sec_time = end - start;
 
@@ -213,14 +213,14 @@ int main(int argc, char *argv[])
     end = std::chrono::steady_clock::now();
     std::chrono::duration<double> min_circle_time = end - start;
 
-    std::cout << "recursive_sec Algorithm: Center = { " << mec_recursive_sec.center()
-              << " } Radius = " << std::sqrt(CGAL::to_double(mec_recursive_sec.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
+    std::cout << "Recursive Algorithm: Center = {" << mec_recursive.center()
+              << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
 
-    std::cout << "Sec Algorithm: Center = { " << mec_sec.center()
-              << " } Radius = " << std::sqrt(CGAL::to_double(mec_sec.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
+    std::cout << "Iterative Algorithm: Center = {" << mec_iterative.center()
+              << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
 
-    std::cout << "Min Circle Algorithm: Center = { " << mec_min_circle.center()
-              << " } Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
+    std::cout << " In-Built Algorithm: Center = {" << mec_min_circle.center()
+              << "} Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
 
     if (argc == 3)
     {
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
             }
 
             auto start = std::chrono::steady_clock::now();
-            Circle_2 mec_recursive_sec = recursive(points);
+            Circle_2 mec_recursive = recursive(points);
             auto end = std::chrono::steady_clock::now();
             std::chrono::duration<double> recursive_sec_time = end - start;
             fout << n << "," << recursive_sec_time.count() << std::endl;
