@@ -11,71 +11,59 @@
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::Point_2 Point_2;
-typedef CGAL::Min_circle_2_traits_2<K> Traits;
-typedef CGAL::Min_circle_2<Traits> Min_circle;
 typedef K::Segment_2 Segment_2;
 typedef K::Circle_2 Circle_2;
+typedef CGAL::Min_circle_2_traits_2<K> Traits;
+typedef CGAL::Min_circle_2<Traits> Min_circle;
 typedef K::Bounded_side Bounded_side;
 
-struct Circle
+Circle_2 base_case(const std::vector<Point_2> &points)
 {
-    Point_2 C;
-    double R;
-};
-
-Circle convert_to_circle(const Point_2 &center, double radius)
-{
-    Circle c;
-    c.C = center;
-    c.R = radius;
-    return c;
-}
-
-Circle min_circle_trivial(const std::vector<Point_2> &P)
-{
-    assert(P.size() <= 3);
-    if (P.empty())
+    assert(points.size() <= 3);
+    if (points.empty())
     {
-        return convert_to_circle(Point_2(0, 0), 0);
+        return Circle_2(Point_2(0, 0), 0);
     }
-    else if (P.size() == 1)
+    else if (points.size() == 1)
     {
-        return convert_to_circle(P[0], 0);
+        return Circle_2(points[0], 0);
     }
-    else if (P.size() == 2)
+    else if (points.size() == 2)
     {
-        return convert_to_circle(Point_2((P[0].x() + P[1].x()) / 2, (P[0].y() + P[1].y()) / 2), std::sqrt(CGAL::squared_distance(P[0], P[1])) / 2);
+        return Circle_2(Point_2((points[0].x() + points[1].x()) / 2, (points[0].y() + points[1].y()) / 2), CGAL::squared_distance(points[0], points[1]) / 4);
     }
-    std::vector<Point_2>::const_iterator it = P.begin();
+    std::vector<Point_2>::const_iterator it = points.begin();
     Min_circle mc(it, it + 3, true);
     Traits::Circle c = mc.circle();
-    return convert_to_circle(c.center(), std::sqrt(c.squared_radius()));
+    return Circle_2(c.center(), c.squared_radius());
 }
 
-Circle welzl_helper(std::vector<Point_2> &P,
-                    std::vector<Point_2> R, int n)
+
+Circle_2 recursive_1(std::vector<Point_2> &points,
+                    std::vector<Point_2> sec_points, int n)
 {
-    if (n == 0 || R.size() == 3)
+    if (n == 0 || sec_points.size() == 3)
     {
-        return min_circle_trivial(R);
+        return base_case(sec_points);
     }
     int idx = rand() % n;
-    Point_2 p = P[idx];
-    std::swap(P[idx], P[n - 1]);
-    Circle d = welzl_helper(P, R, n - 1);
-    if (CGAL::squared_distance(d.C, p) <= d.R * d.R)
+    Point_2 p = points[idx];
+    std::swap(points[idx], points[n - 1]);
+    Circle_2 smaller_sec = recursive_1(points, sec_points, n - 1);
+    if (CGAL::squared_distance(smaller_sec.center() , p) <= smaller_sec.squared_radius())
     {
-        return d;
+        return smaller_sec;
     }
-    R.push_back(p);
-    return welzl_helper(P, R, n - 1);
+    sec_points.push_back(p);
+    return recursive_1(points, sec_points, n - 1);
 }
 
-Circle welzl(std::vector<Point_2> &P)
+Circle_2 recursive(std::vector<Point_2> &points)
 {
-    // std::vector<Point_2> P_copy = P;
-    std::random_shuffle(P.begin(), P.end());
-    return welzl_helper(P, {}, P.size());
+    // std::vector<Point_2> P_copy = points;
+    auto rng = std::default_random_engine {};
+    std::shuffle(std::begin(points), std::end(points), rng);
+    return recursive_1(points, {}, points.size());
 }
 
 
@@ -83,7 +71,7 @@ Circle welzl(std::vector<Point_2> &P)
 
 
 
-Circle_2 sec2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n)
+Circle_2 iterative_2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n)
 { 
   Circle_2 c(p1, p2);
   for(int i = 0; i < n; i++) {
@@ -98,7 +86,7 @@ Circle_2 sec2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n)
   
 }
 
-Circle_2 sec1(std::vector<Point_2> &points, int n, Point_2 q)
+Circle_2 iterative_1(std::vector<Point_2> &points, int n, Point_2 q)
 {
   // std::vector<Point_2> points_ (points.begin(), points.begin() + n);
 
@@ -112,7 +100,7 @@ Circle_2 sec1(std::vector<Point_2> &points, int n, Point_2 q)
     Point_2 p = points[i];
     Bounded_side s = c.bounded_side(p);
     if(! (s == CGAL::ON_BOUNDED_SIDE || s == CGAL::ON_BOUNDARY)) {
-      c = sec2(p, q, points, i);
+      c = iterative_2(p, q, points, i);
     }
 
   }
@@ -120,14 +108,19 @@ Circle_2 sec1(std::vector<Point_2> &points, int n, Point_2 q)
 
 }
 
-Circle_2 sec(std::vector<Point_2> &points) 
+Circle_2 iterative(std::vector<Point_2> &points) 
 {
   if(points.size() == 0) {
-    return Circle_2(Point_2(0, 0), Point_2(1, 0));
+    return Circle_2(Point_2(0, 0), 0);
   } 
   if(points.size() == 1) {
-    return Circle_2(points[0], Point_2(0, 0));
+    return Circle_2(points[0], 0);
   }
+
+  // if(points.size()<=3){
+  //   return base_case(points);
+  // }
+
   // randomly shuffle the vector of points
   // ref: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
   
@@ -142,7 +135,7 @@ Circle_2 sec(std::vector<Point_2> &points)
     Point_2 p = points[i];
     Bounded_side s = c.bounded_side(p);
     if (! (s == CGAL::ON_BOUNDED_SIDE || s == CGAL::ON_BOUNDARY)) {
-      c = sec1(points, i, p);
+      c = iterative_1(points, i, p);
     }
   }
   return c;
@@ -203,31 +196,31 @@ int main(int argc, char *argv[])
     std::vector<Point_2> points2 = points;
 
     auto start = std::chrono::steady_clock::now();
-    Circle mec_welzl = welzl(points1);
+    Circle_2 mec_recursive_sec = recursive(points1);
     auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> welzl_time = end - start;
+    std::chrono::duration<double> recursive_sec_time = end - start;
 
 
     start = std::chrono::steady_clock::now();
-    Circle_2 mec_sec = sec(points2);
+    Circle_2 mec_sec = iterative(points2);
     end = std::chrono::steady_clock::now();
     std::chrono::duration<double> sec_time = end - start;
 
     start = std::chrono::steady_clock::now();
     Min_circle mc(points.begin(), points.end(), true);
     Traits::Circle mc_circle = mc.circle();
-    Circle mec_min_circle = convert_to_circle(mc_circle.center(), std::sqrt(mc_circle.squared_radius()));
+    Circle_2 mec_min_circle = Circle_2(mc_circle.center(),mc_circle.squared_radius());
     end = std::chrono::steady_clock::now();
     std::chrono::duration<double> min_circle_time = end - start;
 
-    std::cout << "Welzl Algorithm: Center = { " << mec_welzl.C.x() << ", " << mec_welzl.C.y()
-              << " } Radius = " << mec_welzl.R << " Time = " << welzl_time.count() << " seconds" << std::endl;
+    std::cout << "recursive_sec Algorithm: Center = { " << mec_recursive_sec.center()
+              << " } Radius = " << std::sqrt(CGAL::to_double(mec_recursive_sec.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
 
     std::cout << "Sec Algorithm: Center = { " << mec_sec.center()
               << " } Radius = " << std::sqrt(CGAL::to_double(mec_sec.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
 
-    std::cout << "Min Circle Algorithm: Center = { " << mec_min_circle.C.x() << ", " << mec_min_circle.C.y()
-              << " } Radius = " << mec_min_circle.R << " Time = " << min_circle_time.count() << " seconds" << std::endl;
+    std::cout << "Min Circle Algorithm: Center = { " << mec_min_circle.center()
+              << " } Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
 
     if (argc == 3)
     {
@@ -246,10 +239,10 @@ int main(int argc, char *argv[])
             }
 
             auto start = std::chrono::steady_clock::now();
-            Circle mec_welzl = welzl(points);
+            Circle_2 mec_recursive_sec = recursive(points);
             auto end = std::chrono::steady_clock::now();
-            std::chrono::duration<double> welzl_time = end - start;
-            fout << n << "," << welzl_time.count() << std::endl;
+            std::chrono::duration<double> recursive_sec_time = end - start;
+            fout << n << "," << recursive_sec_time.count() << std::endl;
         }
         fout.close();
     }
