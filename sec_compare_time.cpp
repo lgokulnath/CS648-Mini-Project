@@ -17,6 +17,14 @@ typedef CGAL::Min_circle_2_traits_2<K> Traits;
 typedef CGAL::Min_circle_2<Traits> Min_circle;
 typedef K::Bounded_side Bounded_side;
 
+
+
+#define NUM_RUNS 100
+
+
+std::list<Point_2> recursive_points;
+std::list<Point_2>::reverse_iterator itr;
+
 Circle_2 base_case(const std::vector<Point_2> &points)
 {
     assert(points.size() <= 3);
@@ -61,12 +69,43 @@ Circle_2 recursive_1(std::vector<Point_2> &points,
 Circle_2 recursive(std::vector<Point_2> &points)
 {
     // std::vector<Point_2> P_copy = points;
-    auto rng = std::default_random_engine {};
-    std::shuffle(std::begin(points), std::end(points), rng);
+    // auto rng = std::default_random_engine {};
+    // std::shuffle(std::begin(points), std::end(points), rng);
     return recursive_1(points, {}, points.size());
 }
 
+Circle_2 recursive_helper_list(std::list<Point_2> &P,
+                    std::vector<Point_2> R, int n, std::list<Point_2>::reverse_iterator it)
+{
+    if (n== 0 || it == P.rend() || R.size() == 3)
+    {
+        return base_case(R);
+    }
+   
+    Point_2 p = *it;
+    std::list<Point_2>::reverse_iterator itr_ = it;
+    it++;
+    //Point_2 p1 = P.
+    Circle_2 d = recursive_helper_list(P, R, n - 1, it);
+    if (CGAL::squared_distance(d.center() , p) <= d.squared_radius())
+    {
+        return d;
+        
+    }
+    R.push_back(p);
+    d = recursive_helper_list(P, R, n - 1, it);
+    P.push_front(p);
+    P.erase(std::next(itr_).base() );
+    
+    return d;
+}
 
+Circle_2 recursive_list(std::list<Point_2> &P)
+{
+   
+    itr = P.rbegin();
+    return recursive_helper_list(P, {}, P.size(), itr);
+}
 
 
 
@@ -124,8 +163,8 @@ Circle_2 iterative(std::vector<Point_2> &points)
   // randomly shuffle the vector of points
   // ref: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
   
-  auto rng = std::default_random_engine {};
-  std::shuffle(std::begin(points), std::end(points), rng);
+  // auto rng = std::default_random_engine {};
+  // std::shuffle(std::begin(points), std::end(points), rng);
 
 
   Point_2 p1 = points[0];
@@ -182,70 +221,103 @@ int main(int argc, char *argv[])
     {
         n = n_points;
     }
+    double t1=0, t2=0, t3=0, t4=0;
+    for(int ii = 0; ii < NUM_RUNS; ii++) {
+      std::vector<Point_2> points;
+      std::random_device rd;
+      std::mt19937 gen(rd());
+      std::uniform_real_distribution<> dis(-1000.0, 1000.0);
 
-    std::vector<Point_2> points;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(-1000.0, 1000.0);
+      for (int i = 0; i < n; ++i)
+      {
+          points.emplace_back(dis(gen), dis(gen));
+      }
+      auto rng = std::default_random_engine {};
+      std::shuffle(std::begin(points), std::end(points), rng);
 
-    for (int i = 0; i < n; ++i)
-    {
-        points.emplace_back(dis(gen), dis(gen));
+      std::vector<Point_2> points1 = points;
+      std::vector<Point_2> points2 = points;
+      recursive_points.clear();
+      std::copy( points.begin(), points.end(), std::back_inserter( recursive_points) );
+
+      auto start = std::chrono::steady_clock::now();
+      Circle_2 mec_recursive = recursive(points1);
+      auto end = std::chrono::steady_clock::now();
+      std::chrono::duration<double> recursive_sec_time = end - start;
+
+      start = std::chrono::steady_clock::now();
+      Circle_2 mec_recursive_list = recursive_list(recursive_points);
+      end = std::chrono::steady_clock::now();
+      std::chrono::duration<double> recursive_sec_list_time = end - start;
+
+
+      start = std::chrono::steady_clock::now();
+      Circle_2 mec_iterative = iterative(points2);
+      end = std::chrono::steady_clock::now();
+      std::chrono::duration<double> sec_time = end - start;
+
+      start = std::chrono::steady_clock::now();
+      Min_circle mc(points.begin(), points.end(), false);
+      Traits::Circle mc_circle = mc.circle();
+      Circle_2 mec_min_circle = Circle_2(mc_circle.center(),mc_circle.squared_radius());
+      end = std::chrono::steady_clock::now();
+      std::chrono::duration<double> min_circle_time = end - start;
+
+      t1 += recursive_sec_time.count();
+      t2 += recursive_sec_list_time.count();
+      t3 += sec_time.count();
+      t4 += min_circle_time.count();
+
+      if(ii % 50 == 0) {
+
+      std::cout << "Recursive Algorithm: Center = {" << mec_recursive.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
+
+                std::cout << "Recursive optimized Algorithm: Center = {" << mec_recursive_list.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive_list.squared_radius())) << " Time = " << recursive_sec_list_time.count() << " seconds" << std::endl;
+
+      std::cout << "Iterative Algorithm: Center = {" << mec_iterative.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
+
+      std::cout << " In-Built Algorithm: Center = {" << mec_min_circle.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
+      std::cout << "---------------------------------------------------------------------------------\n";
+      }
+      if (argc == 3)
+      {
+          std::ofstream fout("data_report_tables/data_table_1.csv", std::ios::app);
+          for (int i = 0; i < n_samples; i++)
+          {
+
+              std::vector<Point_2> points;
+              std::random_device rd;
+              std::mt19937 gen(rd());
+              std::uniform_real_distribution<> dis(-1000.0, 1000.0);
+
+              for (int i = 0; i < n; ++i)
+              {
+                  points.emplace_back(dis(gen), dis(gen));
+              }
+
+              auto start = std::chrono::steady_clock::now();
+              Circle_2 mec_recursive = recursive(points);
+              auto end = std::chrono::steady_clock::now();
+              std::chrono::duration<double> recursive_sec_time = end - start;
+              fout << n << "," << recursive_sec_time.count() << std::endl;
+          }
+          fout.close();
+      }
     }
-    std::vector<Point_2> points1 = points;
-    std::vector<Point_2> points2 = points;
 
-    auto start = std::chrono::steady_clock::now();
-    Circle_2 mec_recursive = recursive(points1);
-    auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> recursive_sec_time = end - start;
+    t1 /= NUM_RUNS;
+    t2 /= NUM_RUNS;
+    t3 /= NUM_RUNS;
+    t4 /= NUM_RUNS;
 
-
-    start = std::chrono::steady_clock::now();
-    Circle_2 mec_iterative = iterative(points2);
-    end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> sec_time = end - start;
-
-    start = std::chrono::steady_clock::now();
-    Min_circle mc(points.begin(), points.end(), true);
-    Traits::Circle mc_circle = mc.circle();
-    Circle_2 mec_min_circle = Circle_2(mc_circle.center(),mc_circle.squared_radius());
-    end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> min_circle_time = end - start;
-
-    std::cout << "Recursive Algorithm: Center = {" << mec_recursive.center()
-              << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
-
-    std::cout << "Iterative Algorithm: Center = {" << mec_iterative.center()
-              << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
-
-    std::cout << " In-Built Algorithm: Center = {" << mec_min_circle.center()
-              << "} Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
-
-    if (argc == 3)
-    {
-        std::ofstream fout("data_report_tables/data_table_1.csv", std::ios::app);
-        for (int i = 0; i < n_samples; i++)
-        {
-
-            std::vector<Point_2> points;
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<> dis(-1000.0, 1000.0);
-
-            for (int i = 0; i < n; ++i)
-            {
-                points.emplace_back(dis(gen), dis(gen));
-            }
-
-            auto start = std::chrono::steady_clock::now();
-            Circle_2 mec_recursive = recursive(points);
-            auto end = std::chrono::steady_clock::now();
-            std::chrono::duration<double> recursive_sec_time = end - start;
-            fout << n << "," << recursive_sec_time.count() << std::endl;
-        }
-        fout.close();
-    }
+    std::cout << "Recursive algo time = " << t1 << "\n";
+    std::cout << "Recursive optimized algo time = " << t2 << "\n";
+    std::cout << "Iterative algo time = " << t3 << "\n";
+    std::cout << "CGAL algo time = " << t4 << "\n";
 
     return 0;
 }
