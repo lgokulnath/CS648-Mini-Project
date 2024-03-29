@@ -82,6 +82,7 @@ Circle welzl(const std::vector<Point> &P)
     return welzl_helper(P_copy, {}, P_copy.size());
 }
 
+
 bool isAcuteAngleTriangle(const Point& p1, const Point& p2, const Point& p3) {
     K::Vector_2 v1(p1, p2);
     K::Vector_2 v2(p1, p3);
@@ -217,7 +218,7 @@ int main(int argc, char *argv[])
 
     if (argc == 3)
     {
-        std::ofstream fout("data_report_tables/data_table_4.csv", std::ios::app);
+        std::ofstream fout("data_report_tables/data_table_sec.csv", std::ios::app);
         for (int i = 0; i < n_samples; i++)
         {
             std::vector<Point> points;
@@ -233,30 +234,30 @@ int main(int argc, char *argv[])
                 sec_points.push_back(Point_2(x, y));
             }
 
-            // auto start = std::chrono::steady_clock::now();
-            // Circle mec_welzl = welzl(points);
-            // auto end = std::chrono::steady_clock::now();
-            // std::chrono::duration<double> welzl_time = end - start;
-
             auto start = std::chrono::steady_clock::now();
+            Circle mec_welzl = welzl(points);
+            auto end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> welzl_time = end - start;
+
+            start = std::chrono::steady_clock::now();
             Min_circle mc(points.begin(), points.end(), true);
             Traits::Circle mc_circle = mc.circle();
             Circle mec_min_circle = convert_to_circle(mc_circle.center(), std::sqrt(mc_circle.squared_radius()));
-            auto end = std::chrono::steady_clock::now();
+            end = std::chrono::steady_clock::now();
             std::chrono::duration<double> min_circle_time = end - start;
 
-            // start = std::chrono::steady_clock::now();
-            // auto mec_deterministic = algorithm1(points);
-            // end = std::chrono::steady_clock::now();
-            // std::chrono::duration<double> deterministic_time = end - start;
+            start = std::chrono::steady_clock::now();
+            auto mec_deterministic = algorithm1(points);
+            end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> deterministic_time = end - start;
 
             start = std::chrono::steady_clock::now();
             Circle_2 _sec = sec(sec_points);
             end = std::chrono::steady_clock::now();
             std::chrono::duration<double> sec_time = end - start;
 
-            // fout<<n<<","<<sec_time.count()<<","<<welzl_time.count()<<","<<min_circle_time.count()<<","<<deterministic_time.count()<<std::endl;
-            fout<<n<<","<<sec_time.count()<<","<<min_circle_time.count()<<std::endl;
+            fout<<n<<","<<sec_time.count()<<","<<welzl_time.count()<<","<<min_circle_time.count()<<","<<deterministic_time.count()<<std::endl;
+            // fout<<n<<","<<sec_time.count()<<","<<min_circle_time.count()<<std::endl;
         }
         fout.close();
     }
