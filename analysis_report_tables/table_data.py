@@ -166,20 +166,21 @@ plt.title('Percentage of samples exceeding the average runtime by a certain amou
 plt.legend()
 plt.savefig('plots/avg_exceed_fit_5000_n.png')
 # print('-----------------------------------------------------')
-# n_samples = 25
-# num_batches = len(df2) // n_samples
-# for i in range(num_batches):
-#     start_index = i * n_samples
-#     end_index = min((i + 1) * n_samples, len(df2))
-#     batch = df2.iloc[start_index:end_index]
-#     # Calculate average, standard deviation, and maximum of the values in the first column
+n_samples = 25
+num_batches = len(df2) // n_samples
+for i in range(num_batches):
+    start_index = i * n_samples
+    end_index = min((i + 1) * n_samples, len(df2))
+    batch = df2.iloc[start_index:end_index]
+    # Calculate average, standard deviation, and maximum of the values in the first column
 
-#     avg_time_welzl = batch.iloc[:, 1].mean()
-#     avg_time_cgal = batch.iloc[:, 2].mean()
-#     avg_time_det = batch.iloc[:, 3].mean()
+    avg_time_sec = batch.iloc[:, 1].mean()
+    avg_time_welzl = batch.iloc[:, 2].mean()
+    avg_time_cgal = batch.iloc[:, 3].mean()
+    avg_time_det = batch.iloc[:, 4].mean()
 
-#     n_points = batch.iloc[0,0]
-#     print(f'n: {n_points}, Average runtime for Welzl: {avg_time_welzl}, Cgal: {avg_time_cgal}, Deterministic: {avg_time_det}')
+    n_points = batch.iloc[0,0]
+    print(f'n: {n_points}, Average runtime for SEC: {avg_time_sec}, Welzl: {avg_time_welzl}, Cgal: {avg_time_cgal}, Deterministic: {avg_time_det}')
 
 # print('-----------------------------------------------------')
 
