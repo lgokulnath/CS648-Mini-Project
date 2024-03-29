@@ -40,10 +40,10 @@ regr_cgal.fit(xs, cgal_runtimes)
 a_cgal = regr_cgal.coef_
 b_cgal = regr_cgal.intercept_
 
-plt.scatter(xs, sec_runtimes, color='green', label='Expected O(n) algorithm')
-plt.scatter(xs, cgal_runtimes, color='yellow', label='CGAL in-built algorithm')
-plt.plot(xs, a_sec*xs + b_sec, color='red', label='Best fit for Randomized Expected O(n) algorithm runtime')
-plt.plot(xs, a_cgal*xs + b_cgal, color='blue', label='Best fit for CGAL in-built algorithm runtime')
+plt.scatter(xs, sec_runtimes, color='green', label='Expected O(n) algorithm (Algo 1)')
+plt.scatter(xs, cgal_runtimes, color='yellow', label='CGAL in-built algorithm (Algo 2)')
+plt.plot(xs, a_sec*xs + b_sec, color='red', label=f'Best fit for Algo 1 (slope = {a_sec})')
+plt.plot(xs, a_cgal*xs + b_cgal, color='blue', label=f'Best fit for Algo 2 (slope = {a_cgal})')
 plt.xlabel('Number of points')
 plt.ylabel('Runtime (in ms)')
 plt.title('Comparison of Randomized v/s CGAL in-built algorithm Runtimes')
