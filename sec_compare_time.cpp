@@ -1,3 +1,11 @@
+/*
+
+In this file, it has been assumed the list of points has been permuted randomly in main function itself, i.e., before 
+passing them in the SEC functions.
+
+*/
+
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -54,7 +62,7 @@ Circle_2 recursive_1(std::vector<Point_2> &points,
     {
         return base_case(sec_points);
     }
-    int idx = rand() % n;
+    int idx = n-1;
     Point_2 p = points[idx];
     std::swap(points[idx], points[n - 1]);
     Circle_2 smaller_sec = recursive_1(points, sec_points, n - 1);
@@ -108,6 +116,106 @@ Circle_2 recursive_list(std::list<Point_2> &P)
 }
 
 
+Circle_2 iterative_2_opt(Point_2 p1, Point_2 p2, std::list<Point_2> &points, int n)
+{ 
+  Circle_2 c(p1, p2);
+  std::list<Point_2>::iterator it;
+  it = points.begin();
+  for(int i = 0; i < n; i++, it++ ){
+    Point_2 p = *it;
+    //Bounded_side s = c.bounded_side(p);
+    if (CGAL::squared_distance(c.center() , p) > c.squared_radius()) {
+      // this point has to be on the circle
+      c = Circle_2(p1, p2, p);
+    }
+  }
+  return c;
+  
+}
+
+Circle_2 iterative_1_opt(std::list<Point_2> &points, int n, Point_2 q)
+{
+  //std::vector<Point_2> points_ (points.begin(), points.begin() + n);
+
+  //auto rng = std::default_random_engine {};
+  //std::shuffle(std::begin(points_), std::end(points_), rng);
+
+  Circle_2 c(q, points.front());
+  std::list<Point_2>::iterator it;
+  it = points.begin();
+  it++;
+
+  for(int i = 1; i < n; i++) {
+    
+    Point_2 p = *it;
+    auto it1 = it;
+    //Bounded_side s = c.bounded_side(p);
+    if(CGAL::squared_distance(c.center() , p) > c.squared_radius()) {
+      c = iterative_2_opt(p, q, points, i);
+      it++;
+
+      //move to front
+      points.push_front(p);
+      points.erase(it1 );
+      // // *it = (points.front());
+      // *(points.begin()) = p;
+      continue;
+    }
+    it++;
+
+  }
+  return c;
+
+}
+
+Circle_2 iterative_opt(std::list<Point_2> &points) 
+{
+  if(points.size() == 0) {
+    return Circle_2(Point_2(0, 0), Point_2(1, 0));
+  } 
+  if(points.size() == 1) {
+    return Circle_2(points.front(), Point_2(0, 0));
+  }
+  // randomly shuffle the vector of points
+  // ref: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
+  
+//   auto rng = std::default_random_engine {};
+//   std::shuffle(std::begin(points), std::end(points), rng);
+   std::list<Point_2>::iterator it;
+   it = points.begin();
+   it++;
+
+
+
+  Point_2 p1 = points.front();
+  Point_2 p2 = *it;
+  
+  Circle_2 c(p1, p2); it++;
+  for(int i=2; it != points.end() ;  i++) {
+    Point_2 p = *it;
+    auto it1 = it;
+   // Bounded_side s = c.bounded_side(p);
+    if (CGAL::squared_distance(c.center() , p) > c.squared_radius()) {
+      c = iterative_1_opt(points, i, p);
+      it++;
+      // move this point to front of list
+      points.push_front(p);
+      points.erase(it1 );
+      continue;
+    //   *it = p1;
+
+    //   *(points.begin()) = p;
+
+    }
+    it++;
+  }
+  return c;
+}
+
+
+
+
+
 
 
 Circle_2 iterative_2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n)
@@ -115,8 +223,8 @@ Circle_2 iterative_2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n
   Circle_2 c(p1, p2);
   for(int i = 0; i < n; i++) {
     Point_2 p = points[i];
-    Bounded_side s = c.bounded_side(p);
-    if (! (s == CGAL::ON_BOUNDED_SIDE || s == CGAL::ON_BOUNDARY)) {
+    //Bounded_side s = c.bounded_side(p);
+    if (CGAL::squared_distance(c.center() , p) > c.squared_radius()) {
       // this point has to be on the circle
       c = Circle_2(p1, p2, p);
     }
@@ -137,8 +245,8 @@ Circle_2 iterative_1(std::vector<Point_2> &points, int n, Point_2 q)
   for(int i = 1; i < n; i++) {
     
     Point_2 p = points[i];
-    Bounded_side s = c.bounded_side(p);
-    if(! (s == CGAL::ON_BOUNDED_SIDE || s == CGAL::ON_BOUNDARY)) {
+    //Bounded_side s = c.bounded_side(p);
+    if(CGAL::squared_distance(c.center() , p) > c.squared_radius()) {
       c = iterative_2(p, q, points, i);
     }
 
@@ -172,8 +280,8 @@ Circle_2 iterative(std::vector<Point_2> &points)
   Circle_2 c(p1, p2);
   for(int i = 2; i < points.size(); i++) {
     Point_2 p = points[i];
-    Bounded_side s = c.bounded_side(p);
-    if (! (s == CGAL::ON_BOUNDED_SIDE || s == CGAL::ON_BOUNDARY)) {
+    //Bounded_side s = c.bounded_side(p);
+    if (CGAL::squared_distance(c.center() , p) > c.squared_radius()) {
       c = iterative_1(points, i, p);
     }
   }
@@ -221,9 +329,10 @@ int main(int argc, char *argv[])
     {
         n = n_points;
     }
-    double t1=0, t2=0, t3=0, t4=0;
+    double t1=0, t2=0, t3=0, t4=0, t5 = 0;
     for(int ii = 0; ii < NUM_RUNS; ii++) {
       std::vector<Point_2> points;
+      std::list<Point_2> list_points;
       std::random_device rd;
       std::mt19937 gen(rd());
       std::uniform_real_distribution<> dis(-1000.0, 1000.0);
@@ -239,6 +348,7 @@ int main(int argc, char *argv[])
       std::vector<Point_2> points2 = points;
       recursive_points.clear();
       std::copy( points.begin(), points.end(), std::back_inserter( recursive_points) );
+      std::copy( points.begin(), points.end(), std::back_inserter( list_points) );
 
       auto start = std::chrono::steady_clock::now();
       Circle_2 mec_recursive = recursive(points1);
@@ -257,6 +367,11 @@ int main(int argc, char *argv[])
       std::chrono::duration<double> sec_time = end - start;
 
       start = std::chrono::steady_clock::now();
+      Circle_2 mec_iterative_opt = iterative_opt(list_points);
+      end = std::chrono::steady_clock::now();
+      std::chrono::duration<double> sec_time_1 = end - start;
+
+      start = std::chrono::steady_clock::now();
       Min_circle mc(points.begin(), points.end(), false);
       Traits::Circle mc_circle = mc.circle();
       Circle_2 mec_min_circle = Circle_2(mc_circle.center(),mc_circle.squared_radius());
@@ -267,6 +382,7 @@ int main(int argc, char *argv[])
       t2 += recursive_sec_list_time.count();
       t3 += sec_time.count();
       t4 += min_circle_time.count();
+      t5 += sec_time_1.count();
 
       if(ii % 50 == 0) {
 
@@ -278,6 +394,9 @@ int main(int argc, char *argv[])
 
       std::cout << "Iterative Algorithm: Center = {" << mec_iterative.center()
                 << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
+
+      std::cout << "Iterative optimized Algorithm: Center = {" << mec_iterative_opt.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative_opt.squared_radius())) << " Time = " << sec_time_1.count() << " seconds" << std::endl;
 
       std::cout << " In-Built Algorithm: Center = {" << mec_min_circle.center()
                 << "} Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
@@ -313,10 +432,12 @@ int main(int argc, char *argv[])
     t2 /= NUM_RUNS;
     t3 /= NUM_RUNS;
     t4 /= NUM_RUNS;
+    t5 /= NUM_RUNS;
 
     std::cout << "Recursive algo time = " << t1 << "\n";
     std::cout << "Recursive optimized algo time = " << t2 << "\n";
     std::cout << "Iterative algo time = " << t3 << "\n";
+    std::cout << "Iterative opt algo time = " << t5 << "\n";
     std::cout << "CGAL algo time = " << t4 << "\n";
 
     return 0;
