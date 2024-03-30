@@ -8,6 +8,8 @@ typedef Kernel::Segment_2 Segment_2;
 typedef Kernel::Circle_2 Circle_2;
 typedef Kernel::Bounded_side Bounded_side;
 
+# define PI           3.14159265358979323846  /* pi */
+
 Circle_2 sec2(Point_2 p1, Point_2 p2, std::vector<Point_2> &points, int n)
 { 
   Circle_2 c(p1, p2);
@@ -45,7 +47,7 @@ Circle_2 sec1(std::vector<Point_2> &points, int n, Point_2 q)
 
 }
 
-Circle_2 sec(std::vector<Point_2> &points) 
+Circle_2 sec(std::vector<Point_2> &points, bool shuffle=true) 
 {
   if(points.size() == 0) {
     return Circle_2(Point_2(0, 0), Point_2(1, 0));
@@ -55,9 +57,10 @@ Circle_2 sec(std::vector<Point_2> &points)
   }
   // randomly shuffle the vector of points
   // ref: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
-  
-  auto rng = std::default_random_engine {};
-  std::shuffle(std::begin(points), std::end(points), rng);
+  if(shuffle) {
+    auto rng = std::default_random_engine {};
+    std::shuffle(std::begin(points), std::end(points), rng);
+  }
 
 
   Point_2 p1 = points[0];
@@ -74,44 +77,51 @@ Circle_2 sec(std::vector<Point_2> &points)
 }
 
 
+std::vector<Point_2> generate_spiral(int n, double max_radius=1000) {
+    double theta = PI * 2 / ((double)(n));
+    std::vector<Point_2> ps;
+    for(int i = 0; i < n; i++) {
+      double r = max_radius * (double(i)) / n;
+      double x = r*std::cos(theta*i);
+      double y = r*std::sin(theta*i);
+      Point_2 p(x, y);
+      ps.push_back(p);
+    }
+    return ps;
+
+}
+
+
 
 
 
 
 int main(int argc, char* argv[])
 {
-  Point_2 p1(0, 0);
-  Point_2 p2(4, 0);
-  std::vector<Point_2> points = {Point_2(2, 0), Point_2(2, 2), Point_2(2, 10), p1, p2};
-  Circle_2 c = sec(points);
-  double radius = std::sqrt(CGAL::to_double(c.squared_radius()));
-  std::cout << "SEC center = " << c.center() << "\n";
-  std::cout << "SEC radius = " << radius << "\n";
+  // Point_2 p1(0, 0);
+  // Point_2 p2(4, 0);
+  // std::vector<Point_2> points = {Point_2(2, 0), Point_2(2, 2), Point_2(2, 10), p1, p2};
+  // Circle_2 c = sec(points);
+  // double radius = std::sqrt(CGAL::to_double(c.squared_radius()));
+  // std::cout << "SEC center = " << c.center() << "\n";
+  // std::cout << "SEC radius = " << radius << "\n";
+  int n;
+  std::cout << "Enter number of points: ";
+  std::cin >> n;
+  double max_radius = 1000;
+  std::vector<Point_2> ps = generate_spiral(n, max_radius);
 
-    if (argc == 3)
-    {
-        int n_points = std::stoi(argv[1]), n_samples = std::stoi(argv[2]); 
-        int n = n_points;
-        std::ofstream fout("data_report_tables/data_table_sec.csv", std::ios::app);
-        for (int i = 0; i < n_samples; i++)
-        {
-            std::vector<Point_2> points;
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<> dis(-1000.0, 1000.0);
+  auto start = std::chrono::steady_clock::now();
+  Circle_2 mec_iterative = sec(ps, false);
+  auto end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> sec_time = end - start;
 
-            for (int i = 0; i < n; ++i)
-            {
-                points.emplace_back(dis(gen), dis(gen));
-            }
+  start = std::chrono::steady_clock::now();
+  Circle_2 mec_iterative1 = sec(ps, true);
+  end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> sec_time1 = end - start;
 
-            auto start = std::chrono::steady_clock::now();
-            Circle_2 _sec = sec(points);
-            auto end = std::chrono::steady_clock::now();
-            std::chrono::duration<double> sec_time = end - start;
-
-            fout<<n<<","<<sec_time.count()<<","<<std::endl;
-        }
-        fout.close();
-    }
+  std::cout << "Time taken without shuffling = " << sec_time.count() << "\n";
+  std::cout << "Time taken after shuffling = " << sec_time1.count() << "\n";
+    
 }
