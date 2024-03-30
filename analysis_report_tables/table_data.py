@@ -131,23 +131,23 @@ freqs_5000 = (freqs_5000/n_samples)*100
 freqs_10000 = (freqs_10000/n_samples)*100
 freqs_50000 = (freqs_50000/n_samples)*100
 
-# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_500), color='r', label='N = 500')
-# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_1000), color='b', label="N = 1000")
-# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_2000), color='g', label="N = 2000")
-# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_5000), color='yellow', label='N = 5000')
-# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_10000), color='black', label="N = 10000")
-# plt.scatter(np.arange(1, max_exceedance+1), np.array(freqs_50000), color='grey', label="N = 50000")
+# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_500), color='r', label='N = 500')
+# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_1000), color='b', label="N = 1000")
+# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_2000), color='g', label="N = 2000")
+# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_5000), color='yellow', label='N = 5000')
+# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_10000), color='black', label="N = 10000")
+# plt.plot(np.arange(1, max_exceedance+1), np.array(freqs_50000), color='grey', label="N = 50000")
 # plt.xlabel('Average exceeded by (%)')
 # plt.ylabel('Percentage of all the samples')
 # plt.title('Percentage of samples exceeding the average runtime by a certain amount')
-# plt.legend()
-# plt.savefig('plots/avg_exceed_scatter_50000_n.png')
+# # plt.legend()
+# plt.savefig('plots/avg_exceed_all_n.png')
 
 
 
 # Trying to fit y = e^A * e^(Bx)
 X_train = np.arange(1, max_exceedance+1)
-y = freqs_5000
+y = freqs_10000
 regr = np.polyfit(X_train, np.log(y), 1, w=np.sqrt(y))
 A = regr[1]
 B = regr[0]
@@ -158,28 +158,29 @@ B = regr[0]
 ys = math.exp(A)*np.exp(B*X_train)
 
 # print(f'Coefficient: {regr.coef_}, Intercept: {regr.intercept_}')
-plt.scatter(np.arange(1, max_exceedance+1), np.array(y), color='green', label="N = 5000")
+plt.scatter(np.arange(1, max_exceedance+1), np.array(y), color='yellow', label="N = 10000")
 plt.plot(X_train, ys, color='red', label=f'Best fit : A={round(A, 2)}, B={round(B, 2)}')
 plt.xlabel('Average exceeded by (%)')
 plt.ylabel('Percentage of all the samples')
 plt.title('Percentage of samples exceeding the average runtime by a certain amount')
 plt.legend()
-plt.savefig('plots/avg_exceed_fit_5000_n.png')
+plt.savefig('plots/avg_exceed_fit_10000_n.png')
 # print('-----------------------------------------------------')
-# n_samples = 25
-# num_batches = len(df2) // n_samples
-# for i in range(num_batches):
-#     start_index = i * n_samples
-#     end_index = min((i + 1) * n_samples, len(df2))
-#     batch = df2.iloc[start_index:end_index]
-#     # Calculate average, standard deviation, and maximum of the values in the first column
+n_samples = 25
+num_batches = len(df2) // n_samples
+for i in range(num_batches):
+    start_index = i * n_samples
+    end_index = min((i + 1) * n_samples, len(df2))
+    batch = df2.iloc[start_index:end_index]
+    # Calculate average, standard deviation, and maximum of the values in the first column
 
-#     avg_time_welzl = batch.iloc[:, 1].mean()
-#     avg_time_cgal = batch.iloc[:, 2].mean()
-#     avg_time_det = batch.iloc[:, 3].mean()
+    avg_time_sec = batch.iloc[:, 1].mean()
+    avg_time_welzl = batch.iloc[:, 2].mean()
+    avg_time_cgal = batch.iloc[:, 3].mean()
+    avg_time_det = batch.iloc[:, 4].mean()
 
-#     n_points = batch.iloc[0,0]
-#     print(f'n: {n_points}, Average runtime for Welzl: {avg_time_welzl}, Cgal: {avg_time_cgal}, Deterministic: {avg_time_det}')
+    n_points = batch.iloc[0,0]
+    print(f'n: {n_points}, Average runtime for SEC: {avg_time_sec}, Welzl: {avg_time_welzl}, Cgal: {avg_time_cgal}, Deterministic: {avg_time_det}')
 
 # print('-----------------------------------------------------')
 
