@@ -29,6 +29,13 @@ g++ sec_compare_time.cpp -o sec_compare_time -lgmp
 
 Implements the deterministic algorithm for computing the SEC that runs in $O(n^3)$ time, and then compares it with the in-built CGAL algorithm for computing SEC.
 
+Command to execute:
+```
+cd code
+g++ deterministic_On3.cpp -o deterministic_On3
+./deterministic_On3
+```
+
 ### bool isAcuteAngleTriangle(const Point& p1, const Point& p2, const Point& p3)
 
 * Input: Three points p1, p2, p3
@@ -54,6 +61,13 @@ Implements the deterministic algorithm for computing the SEC that runs in $O(n^3
 
 Given a set of points P in 2D plane, generates a random subset S of P containing n/2 points. Then, computes the SEC for set S, and computes the number of points lying outside this SEC. Finally, logs the empirical average values for further analysis.
 
+Command to execute:
+```
+cd code
+g++ expected_values_experiment.cpp -o expected_values_experiment 
+./expected_values_experiment
+```
+
 ### calculate_expected_value(int n, int repetitions, std::ofstream& outfile)
 
 * Input: Number of points (n), Number of repetitions for the experiment, string representing the output file name for logs
@@ -64,10 +78,25 @@ Given a set of points P in 2D plane, generates a random subset S of P containing
 
 Given a set of points P in 2D plane, generates a random subset S of P containing i points (i = n/2 and sqrt(n)). Then, computes the SEC for set S, and computes the number of points lying outside this SEC. Finally, logs the empirical average values for further analysis.
 
+Command to execute:
+```
+cd code
+g++ points_outside_sec.cpp -o points_outside_sec 
+./points_outside_sec
+```
+
 
 ## compare_all_four.cpp
 
 Given a sample of set of points P in 2D plane and n_samples denoting the number of samples to generate, generates SEC for the sample using four different algorithms: Randomized Expected O(n) algorithm, Welzl's Algorithm, CGAL's inbuilt algorithm, and deterministic $O(n^3)$ algorithm. Logs their runtimes into a csv file which is used for further analysis
+
+Command to execute:
+```
+cd code
+g++ compare_all_four.cpp -o compare_all_four -lgmp
+./compare_all_four <numPoints> <numSamples>
+```
+
 
 ### Circle convert_to_circle(const Point &center, double radius)
 
@@ -121,6 +150,14 @@ Given a sample of set of points P in 2D plane and n_samples denoting the number 
 ## spiral_test_case.cpp
 
 Generates and analyzes the test case where the points are arranged in a spiral arrangement. This test case proves to be the worst possible test case for the randomized SEC algorithm (proved in the report)
+
+Command to execute:
+```
+cd code
+g++ spiral_test_case.cpp -o spiral_test_case
+./spiral_test_case
+```
+
 
 ### std::vector<Point_2> generate_spiral(int n, double max_radius)
 
