@@ -408,24 +408,24 @@ int main(int argc, char *argv[])
       t4 += min_circle_time.count();
       t5 += sec_time_1.count();
 
-      // if(ii % 50 == 0) {
+      if(ii % 50 == 0) {
+        std::cout << "Test case #" << ii << "\n";
+      std::cout << "Recursive Algorithm: Center = {" << mec_recursive.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
 
-      // std::cout << "Recursive Algorithm: Center = {" << mec_recursive.center()
-      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
+                std::cout << "Recursive optimized Algorithm: Center = {" << mec_recursive_list.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive_list.squared_radius())) << " Time = " << recursive_sec_list_time.count() << " seconds" << std::endl;
 
-      //           std::cout << "Recursive optimized Algorithm: Center = {" << mec_recursive_list.center()
-      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive_list.squared_radius())) << " Time = " << recursive_sec_list_time.count() << " seconds" << std::endl;
+      std::cout << "Iterative Algorithm: Center = {" << mec_iterative.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
 
-      // std::cout << "Iterative Algorithm: Center = {" << mec_iterative.center()
-      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
+      std::cout << "Iterative optimized Algorithm: Center = {" << mec_iterative_opt.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative_opt.squared_radius())) << " Time = " << sec_time_1.count() << " seconds" << std::endl;
 
-      // std::cout << "Iterative optimized Algorithm: Center = {" << mec_iterative_opt.center()
-      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative_opt.squared_radius())) << " Time = " << sec_time_1.count() << " seconds" << std::endl;
-
-      // std::cout << " In-Built Algorithm: Center = {" << mec_min_circle.center()
-      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
-      // std::cout << "---------------------------------------------------------------------------------\n";
-      // }
+      std::cout << " In-Built Algorithm: Center = {" << mec_min_circle.center()
+                << "} Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
+      std::cout << "---------------------------------------------------------------------------------\n";
+      }
     }
     //   if (argc == 3)
     //   {
