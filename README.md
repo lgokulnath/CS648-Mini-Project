@@ -1,7 +1,5 @@
 # Smallest Enclosing Cirlce Algorithm
 
-# Smallest Enclosing Cirlce Algorithm
-
 ## sec_compare_time.cpp
 
 Has implementations of both recursive and iterative versions of SEC algorithms and their optimized versions (with move to start heuristic)
