@@ -18,9 +18,51 @@ var isDragging = false;
 var moving_point_x = 0;
 var moving_point_y = 0;
 var moving_point_idx = 0;
+var viz = true;
+const sleep_time = 250;
+
+const ctx = canvas.getContext('2d');
+ctx.canvas.width = .8*window.innerWidth;
+ctx.canvas.height = .8*window.innerHeight;
+console.log('width: ', canvas.width, ctx.canvas.width);
+console.log('height: ', canvas.height);
+console.log(canvas.style.width, canvas.style.height);
+
+var minY = canvas.height*.1,  maxY = canvas.height*.9;
+const rect = canvas.getBoundingClientRect();
+console.log(rect.width, rect.height);
+
+
+// function sleep(delay) {
+//     var start = new Date().getTime();
+//     while (new Date().getTime() < start + delay);
+// }
 
 
 // some utility functions
+
+// emsure manual points are not very close
+function checkPoint(p) {
+    for(let i = 0; i < points.length; i++) {
+        const p1 = points[i]
+        if((p.x - p1.x)**2 + (p.y - p1.y)**2 < 4 * point_radius**2) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function checkViz() {
+    
+        var trueOption = document.getElementById('vizTrue');
+        var falseOption = document.getElementById('vizFalse');
+        
+        if (trueOption.checked) {
+          return true;
+        } 
+        return false;
+      
+}
 
 // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
 // equivalent to random permutation
@@ -46,7 +88,7 @@ class Point {
     static distance(a, b) {
       const dx = a.x - b.x;
       const dy = a.y - b.y;
-  
+   
       return Math.hypot(dx, dy);
     }
     static getRandomPoint(min_x, max_x, min_y, max_y) {
@@ -190,8 +232,41 @@ function _randomizedSEC1(points, point) {
 
 }
 
-// randomized O(n) expected runtime algo
-function randomizedSEC(points) {
+function drawCircleAndPoints(points, sec) {
+
+    clearCanvas();
+    // Draw points
+    ctx.fillStyle = 'blue';
+    points.forEach(point => {
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, point_radius, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+
+    // Draw enclosing circle
+    ctx.strokeStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(sec.center.x, sec.center.y, sec.radius, 0, Math.PI * 2);
+    ctx.stroke();
+}
+
+function _randomizedSEC(points, i, sec) {
+    if(i >= points.length) return sec;
+    const p = points[i];
+    
+    
+    //var sec;
+    if (checkPointOutsideCircle(sec, p)) {
+        // outside
+        sec = _randomizedSEC1(points.slice(0, i), p);
+    }
+    drawCircleAndPoints(points.slice(0, i), sec);
+    drawAt(p, 'green');
+    setTimeout(() => _randomizedSEC(points, i+1, sec), sleep_time);
+}
+
+function randomizedSEC(points){
     let shuffledPoints = randomShuffle(points);
 
     const p0 = shuffledPoints[0], p1 = shuffledPoints[1];
@@ -210,6 +285,38 @@ function randomizedSEC(points) {
     return sec;
 }
 
+// randomized O(n) expected runtime algo
+function randomizedSECviz(points) {
+
+
+
+    let shuffledPoints = randomShuffle(points);
+
+    const p0 = shuffledPoints[0], p1 = shuffledPoints[1];
+
+    let sec = Circle.diameterPoints(p0, p1);
+    
+        // if(sleep_time > 0) {
+        //     const p2 = shuffledPoints[i];
+           // console.log('i = ', i) ;
+            sec = _randomizedSEC(shuffledPoints, 0, sec);
+            // sleep(sleep_time);
+            //drawCircleAndPoints(shuffledPoints.slice(0, i), sec);
+        // }
+        // else{
+        //     const p2 = shuffledPoints[i];
+        //     if (checkPointOutsideCircle(sec, p2)) {
+        //         // outside
+        //         sec = _randomizedSEC1(shuffledPoints.slice(0, i), p2);
+        //     }
+        //     else {
+        //         continue;
+        //     }
+        // }
+    
+    return sec;
+}
+
 //-----------------------------------------------------------canvas manipulations--------------------------------------------------------------------------------
 
 
@@ -219,29 +326,23 @@ function clearCanvas() {
 }
 
 
-const ctx = canvas.getContext('2d');
-ctx.canvas.width = .8*window.innerWidth;
-ctx.canvas.height = .8*window.innerHeight;
-console.log('width: ', canvas.width, ctx.canvas.width);
-console.log('height: ', canvas.height);
-
-var minY = canvas.height*.1,  maxY = canvas.height*.9;
-const rect = canvas.getBoundingClientRect();
 
 function getClickPosition(e) {
     var p = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
     }
+    p.x = p.x * canvas.width / rect.width;
+    p.y = p.y * canvas.height / rect.height;
     console.log('Point: ');
     console.log(p.x, p.y);
-    drawAt(p);
+    //drawAt(p);
     return p;
 }
 
-function drawAt(point) {
+function drawAt(point, color='blue') {
     ctx.beginPath();
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = color;
     ctx.arc(point.x, point.y, point_radius, 0, Math.PI * 2);
     
     ctx.fill();
@@ -272,9 +373,39 @@ function generateRandomPoints() {
     });
 }
 
+function genSECviz() {
+    // console.log('Printing points....');
+    // console.log(points);
+    // var startTime = performance.now();
+    randomizedSECviz(points);
+//     var endTime = performance.now();
+//     var runtime = endTime - startTime;
+//     randmizedSECRuntime.value = runtime.toString() + ' ms';
+//     console.log(runtime);
+//     console.log('Runtime for randmized SEC: ', runtime);
+//    // console.log(runtime);
+//     startTime = performance.now();
+//     const c3 = bruteForceSEC(points);
+//     endTime = performance.now();
+//     runtime = endTime-startTime;
+//     bruteForceSECRuntime.value = runtime.toString() + ' ms';
+//     console.log('Runtime for brute force SEC: ', runtime);
+    //console.log(runtime);
+    // console.log(c1.center);
+    // console.log(c1.radius);
+    // console.log('center and radius of circle as below');
+    // console.log(c2.center);
+    // console.log(c2.radius);
+}
+
 
 function genSEC() {
     clearCanvas();
+    viz = checkViz();
+    if(viz) {
+        genSECviz();
+        return;
+    }
     // Draw points
     ctx.fillStyle = 'blue';
     points.forEach(point => {
@@ -319,8 +450,10 @@ function addManualPoints() {
     canvas.addEventListener('click', function(e) {
         console.log('click detected');
         var point = getClickPosition(e);
-        drawAt(point);
-        points.push(point);
+        if(checkPoint(point)) {
+            drawAt(point);
+            points.push(point);
+        }
     })
     
 
@@ -358,17 +491,23 @@ function drawPoint(x, y) {
 canvas.addEventListener('mousedown', function(e) {
     console.log('mousedown triggered... ');
     var rect = canvas.getBoundingClientRect();
-    var mouseX = e.clientX - rect.left;
-    var mouseY = e.clientY - rect.top;
+    var mouseCoords = getClickPosition(e);
+    var mouseX = mouseCoords.x;
+    var mouseY = mouseCoords.y;
+    // var mouseX = e.clientX - rect.left;
+    // var mouseY = e.clientY - rect.top;
     for(let i = 0; i < points.length; i++) {
         // Check if the mouse is over the point
         const point = points[i];
         var distance = Math.sqrt(Math.pow(mouseX - point.x, 2) + Math.pow(mouseY - point.y, 2));
-        if (distance <= 2*point_radius) {
+        console.log('distance = ', distance);
+        
+        if (distance <= 10) {
             isDragging = true;
             moving_point_x = point.x;
             moving_point_y = point.y;
             moving_point_idx = i;
+            drawAt(point, 'green');
         }
     }
 });
@@ -376,10 +515,13 @@ canvas.addEventListener('mousedown', function(e) {
 // Function to handle mouse move event
 canvas.addEventListener('mousemove', function(e) {
     if (isDragging) {
-        var rect = canvas.getBoundingClientRect();
-        var x = e.clientX - rect.left;
-        var y = e.clientY - rect.top;
-        drawPoint(x, y);
+        // var rect = canvas.getBoundingClientRect();
+        // var x = e.clientX - rect.left;
+        // var y = e.clientY - rect.top;
+        var mouseCoords = getClickPosition(e);
+
+        drawPoint(mouseCoords.x, mouseCoords.y);
+
     }
 });
 
@@ -387,7 +529,6 @@ canvas.addEventListener('mousemove', function(e) {
 canvas.addEventListener('mouseup', function() {
     isDragging = false;
 });
-
 
 
 
