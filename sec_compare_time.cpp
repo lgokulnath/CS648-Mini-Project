@@ -1,7 +1,6 @@
 /*
 
-In this file, it has been assumed the list of points has been permuted randomly in main function itself, i.e., before 
-passing them in the SEC functions.
+Compare runtimes of all the algorithms, optimized versions use "Move to Start" heuristic
 
 */
 
@@ -32,6 +31,17 @@ typedef K::Bounded_side Bounded_side;
 
 std::list<Point_2> recursive_points;
 std::list<Point_2>::reverse_iterator itr;
+
+
+void shuffle_list(std::list<Point_2>& l) {
+  std::vector<std::reference_wrapper<const Point_2>> v(l.begin(), l.end());
+    auto rng = std::default_random_engine {};
+    std::shuffle(v.begin(), v.end(), rng);
+    std::list<Point_2> shuffled;
+    for (auto &ref : v) shuffled.push_back(std::move(ref.get()));
+    l.swap(shuffled);
+    //return shuffled;
+}
 
 Circle_2 base_case(const std::vector<Point_2> &points)
 {
@@ -74,11 +84,13 @@ Circle_2 recursive_1(std::vector<Point_2> &points,
     return recursive_1(points, sec_points, n - 1);
 }
 
-Circle_2 recursive(std::vector<Point_2> &points)
+Circle_2 recursive(std::vector<Point_2> &points, bool shuffle=true)
 {
-    // std::vector<Point_2> P_copy = points;
-    // auto rng = std::default_random_engine {};
-    // std::shuffle(std::begin(points), std::end(points), rng);
+    std::vector<Point_2> P_copy = points;
+    if(shuffle) {
+      auto rng = std::default_random_engine {};
+      std::shuffle(std::begin(points), std::end(points), rng);
+    }
     return recursive_1(points, {}, points.size());
 }
 
@@ -108,9 +120,11 @@ Circle_2 recursive_helper_list(std::list<Point_2> &P,
     return d;
 }
 
-Circle_2 recursive_list(std::list<Point_2> &P)
+Circle_2 recursive_list(std::list<Point_2> &P, bool shuffle=true)
 {
-   
+    if(shuffle) {
+      shuffle_list(P);
+    }
     itr = P.rbegin();
     return recursive_helper_list(P, {}, P.size(), itr);
 }
@@ -168,16 +182,18 @@ Circle_2 iterative_1_opt(std::list<Point_2> &points, int n, Point_2 q)
 
 }
 
-Circle_2 iterative_opt(std::list<Point_2> &points) 
+Circle_2 iterative_opt(std::list<Point_2> &points, bool shuffle=true) 
 {
-  if(points.size() == 0) {
-    return Circle_2(Point_2(0, 0), Point_2(1, 0));
-  } 
-  if(points.size() == 1) {
-    return Circle_2(points.front(), Point_2(0, 0));
+  if(points.size() <= 3) {
+    std::vector<Point_2> v{ std::begin(points), std::end(points) };
+    return base_case(v);
   }
   // randomly shuffle the vector of points
   // ref: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
+
+  if(shuffle) {
+    shuffle_list(points);
+  }
   
 //   auto rng = std::default_random_engine {};
 //   std::shuffle(std::begin(points), std::end(points), rng);
@@ -255,7 +271,7 @@ Circle_2 iterative_1(std::vector<Point_2> &points, int n, Point_2 q)
 
 }
 
-Circle_2 iterative(std::vector<Point_2> &points) 
+Circle_2 iterative(std::vector<Point_2> &points, bool shuffle=true) 
 {
   // if(points.size() == 0) {
   //   return Circle_2(Point_2(0, 0), 0);
@@ -270,9 +286,10 @@ Circle_2 iterative(std::vector<Point_2> &points)
 
   // randomly shuffle the vector of points
   // ref: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
-  
-  // auto rng = std::default_random_engine {};
-  // std::shuffle(std::begin(points), std::end(points), rng);
+  if(shuffle) {
+    auto rng = std::default_random_engine {};
+    std::shuffle(std::begin(points), std::end(points), rng);
+  }
 
 
   Point_2 p1 = points[0];
@@ -309,6 +326,11 @@ int main(int argc, char *argv[])
 {
 
     int n_points, n_samples;
+
+
+    if(argc > 1) {
+      n_points = std::stoi(argv[1]);
+    }
     if (argc == 3)
     {
         n_points = std::stoi(argv[1]);
@@ -324,10 +346,12 @@ int main(int argc, char *argv[])
     {
         std::cout << "Enter the number of points: ";
         std::cin >> n;
+        
     }
     else
     {
         n = n_points;
+        //std::cout << "Num points = " << n << "\n";
     }
     double t1=0, t2=0, t3=0, t4=0, t5 = 0;
     for(int ii = 0; ii < NUM_RUNS; ii++) {
@@ -372,7 +396,7 @@ int main(int argc, char *argv[])
       std::chrono::duration<double> sec_time_1 = end - start;
 
       start = std::chrono::steady_clock::now();
-      Min_circle mc(points.begin(), points.end(), false);
+      Min_circle mc(points.begin(), points.end(), true);
       Traits::Circle mc_circle = mc.circle();
       Circle_2 mec_min_circle = Circle_2(mc_circle.center(),mc_circle.squared_radius());
       end = std::chrono::steady_clock::now();
@@ -384,61 +408,68 @@ int main(int argc, char *argv[])
       t4 += min_circle_time.count();
       t5 += sec_time_1.count();
 
-      if(ii % 50 == 0) {
+      // if(ii % 50 == 0) {
 
-      std::cout << "Recursive Algorithm: Center = {" << mec_recursive.center()
-                << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
+      // std::cout << "Recursive Algorithm: Center = {" << mec_recursive.center()
+      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
 
-                std::cout << "Recursive optimized Algorithm: Center = {" << mec_recursive_list.center()
-                << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive_list.squared_radius())) << " Time = " << recursive_sec_list_time.count() << " seconds" << std::endl;
+      //           std::cout << "Recursive optimized Algorithm: Center = {" << mec_recursive_list.center()
+      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive_list.squared_radius())) << " Time = " << recursive_sec_list_time.count() << " seconds" << std::endl;
 
-      std::cout << "Iterative Algorithm: Center = {" << mec_iterative.center()
-                << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
+      // std::cout << "Iterative Algorithm: Center = {" << mec_iterative.center()
+      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative.squared_radius())) << " Time = " << sec_time.count() << " seconds" << std::endl;
 
-      std::cout << "Iterative optimized Algorithm: Center = {" << mec_iterative_opt.center()
-                << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative_opt.squared_radius())) << " Time = " << sec_time_1.count() << " seconds" << std::endl;
+      // std::cout << "Iterative optimized Algorithm: Center = {" << mec_iterative_opt.center()
+      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_iterative_opt.squared_radius())) << " Time = " << sec_time_1.count() << " seconds" << std::endl;
 
-      std::cout << " In-Built Algorithm: Center = {" << mec_min_circle.center()
-                << "} Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
-      std::cout << "---------------------------------------------------------------------------------\n";
-      }
-      if (argc == 3)
-      {
-          std::ofstream fout("data_report_tables/data_table_1.csv", std::ios::app);
-          for (int i = 0; i < n_samples; i++)
-          {
-
-              std::vector<Point_2> points;
-              std::random_device rd;
-              std::mt19937 gen(rd());
-              std::uniform_real_distribution<> dis(-1000.0, 1000.0);
-
-              for (int i = 0; i < n; ++i)
-              {
-                  points.emplace_back(dis(gen), dis(gen));
-              }
-
-              auto start = std::chrono::steady_clock::now();
-              Circle_2 mec_recursive = recursive(points);
-              auto end = std::chrono::steady_clock::now();
-              std::chrono::duration<double> recursive_sec_time = end - start;
-              fout << n << "," << recursive_sec_time.count() << std::endl;
-          }
-          fout.close();
-      }
+      // std::cout << " In-Built Algorithm: Center = {" << mec_min_circle.center()
+      //           << "} Radius = " << std::sqrt(CGAL::to_double(mec_min_circle.squared_radius())) << " Time = " << min_circle_time.count() << " seconds" << std::endl;
+      // std::cout << "---------------------------------------------------------------------------------\n";
+      // }
     }
+    //   if (argc == 3)
+    //   {
+    //       std::ofstream fout("data_report_tables/data_table_1.csv", std::ios::app);
+    //       for (int i = 0; i < n_samples; i++)
+    //       {
+
+    //           std::vector<Point_2> points;
+    //           std::random_device rd;
+    //           std::mt19937 gen(rd());
+    //           std::uniform_real_distribution<> dis(-1000.0, 1000.0);
+
+    //           for (int i = 0; i < n; ++i)
+    //           {
+    //               points.emplace_back(dis(gen), dis(gen));
+    //           }
+
+    //           auto start = std::chrono::steady_clock::now();
+    //           Circle_2 mec_recursive = recursive(points);
+    //           auto end = std::chrono::steady_clock::now();
+    //           std::chrono::duration<double> recursive_sec_time = end - start;
+    //           fout << n << "," << recursive_sec_time.count() << std::endl;
+    //       }
+    //       fout.close();
+    //   }
+    // }
 
     t1 /= NUM_RUNS;
     t2 /= NUM_RUNS;
     t3 /= NUM_RUNS;
     t4 /= NUM_RUNS;
     t5 /= NUM_RUNS;
-
-    std::cout << "Recursive algo time = " << t1 << "\n";
-    std::cout << "Recursive optimized algo time = " << t2 << "\n";
-    std::cout << "Iterative algo time = " << t3 << "\n";
-    std::cout << "Iterative opt algo time = " << t5 << "\n";
-    std::cout << "CGAL algo time = " << t4 << "\n";
+    if(argc <= 2) {
+      std::cout << "Number of points = " << n << "\n";
+      std::cout << "Recursive algo time = " << t1 << "\n";
+      std::cout << "Recursive optimized algo time = " << t2 << "\n";
+      std::cout << "Iterative algo time = " << t3 << "\n";
+      std::cout << "Iterative optimized algo time = " << t5 << "\n";
+      std::cout << "CGAL algo time = " << t4 << "\n";
+    }
+    else if(argc == 2) {
+      std::cout << n << "," << t3 << "," << t5 << "," << t4 << "\n";
+    }
+    
 
     return 0;
 }
