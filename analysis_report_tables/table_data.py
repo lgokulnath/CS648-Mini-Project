@@ -4,8 +4,8 @@ import pandas as pd
 import math
 from sklearn.linear_model import LinearRegression
 
-df = pd.read_csv("data_report_tables/data_table_sec.csv", header=None)
-df2 = pd.read_csv("data_report_tables/data_table_3.csv", header=None)
+df = pd.read_csv("../data_report_tables/data_table_sec.csv", header=None)
+df2 = pd.read_csv("../data_report_tables/data_table_3.csv", header=None)
 
 n_samples = 1000
 
@@ -164,7 +164,7 @@ plt.xlabel('Average exceeded by (%)')
 plt.ylabel('Percentage of all the samples')
 plt.title('Percentage of samples exceeding the average runtime by a certain amount')
 plt.legend()
-plt.savefig('plots/avg_exceed_fit_10000_n.png')
+plt.savefig('../plots/avg_exceed_fit_10000_n.png')
 # print('-----------------------------------------------------')
 n_samples = 25
 num_batches = len(df2) // n_samples

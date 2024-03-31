@@ -4,7 +4,7 @@ import pandas as pd
 import math
 from sklearn.linear_model import LinearRegression
 
-df = pd.read_csv("data_report_tables/data_table_4.csv", header=None)
+df = pd.read_csv("../data_report_tables/data_table_4.csv", header=None)
 
 n_samples = 100
 num_batches = len(df) // n_samples
@@ -45,7 +45,7 @@ plt.scatter(xs, cgal_runtimes, color='yellow', label='CGAL in-built algorithm (A
 plt.plot(xs, a_sec*xs + b_sec, color='red', label=f'Best fit for Algo 1 (slope = {a_sec})')
 plt.plot(xs, a_cgal*xs + b_cgal, color='blue', label=f'Best fit for Algo 2 (slope = {a_cgal})')
 plt.xlabel('Number of points')
-plt.ylabel('Runtime (in ms)')
+plt.ylabel('Runtime (in s)')
 plt.title('Comparison of Randomized v/s CGAL in-built algorithm Runtimes')
 plt.legend()
-plt.savefig('plots/sec_vs_cgal.png')
+plt.savefig('../plots/sec_vs_cgal.png')
