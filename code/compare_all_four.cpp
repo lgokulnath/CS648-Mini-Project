@@ -172,10 +172,10 @@ Circle_2 sec1(std::vector<Point_2> &points, int n, Point_2 q)
 Circle_2 sec(std::vector<Point_2> &points) 
 {
   if(points.size() == 0) {
-    return Circle_2(Point_2(0, 0), Point_2(1, 0));
+    return Circle_2(Point_2(0, 0), 0);
   } 
   if(points.size() == 1) {
-    return Circle_2(points[0], Point_2(0, 0));
+    return Circle_2(points[0], 0);
   }
   // randomly shuffle the vector of points
   // ref: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector

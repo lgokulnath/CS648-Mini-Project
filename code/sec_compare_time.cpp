@@ -84,6 +84,7 @@ Circle_2 recursive_1(std::vector<Point_2> &points,
     return recursive_1(points, sec_points, n - 1);
 }
 
+//standard recursive implementation
 Circle_2 recursive(std::vector<Point_2> &points, bool shuffle=true)
 {
     std::vector<Point_2> P_copy = points;
@@ -120,6 +121,7 @@ Circle_2 recursive_helper_list(std::list<Point_2> &P,
     return d;
 }
 
+// Optimized recursive implementation with Move to start
 Circle_2 recursive_list(std::list<Point_2> &P, bool shuffle=true)
 {
     if(shuffle) {
@@ -182,6 +184,7 @@ Circle_2 iterative_1_opt(std::list<Point_2> &points, int n, Point_2 q)
 
 }
 
+// optimized iterative SEC algo with move to start
 Circle_2 iterative_opt(std::list<Point_2> &points, bool shuffle=true) 
 {
   if(points.size() <= 3) {
@@ -271,6 +274,7 @@ Circle_2 iterative_1(std::vector<Point_2> &points, int n, Point_2 q)
 
 }
 
+// standard iterative SEC
 Circle_2 iterative(std::vector<Point_2> &points, bool shuffle=true) 
 {
   // if(points.size() == 0) {
