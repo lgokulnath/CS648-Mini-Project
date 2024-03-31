@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
 
     if (argc == 3)
     {
-        std::ofstream fout("data_report_tables/data_table_sec.csv", std::ios::app);
+        std::ofstream fout("../data_report_tables/data_table_sec.csv", std::ios::app);
         for (int i = 0; i < n_samples; i++)
         {
             std::vector<Point> points;

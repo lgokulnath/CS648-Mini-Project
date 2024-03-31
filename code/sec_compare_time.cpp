@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
       t4 += min_circle_time.count();
       t5 += sec_time_1.count();
 
-      if(ii % 50 == 0) {
+      if(ii % 50 == 0 && argc < 2) {
         std::cout << "Test case #" << ii << "\n";
       std::cout << "Recursive Algorithm: Center = {" << mec_recursive.center()
                 << "} Radius = " << std::sqrt(CGAL::to_double(mec_recursive.squared_radius())) << " Time = " << recursive_sec_time.count() << " seconds" << std::endl;
@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
     t3 /= NUM_RUNS;
     t4 /= NUM_RUNS;
     t5 /= NUM_RUNS;
-    if(argc <= 2) {
+    if(argc < 2) {
       std::cout << "Number of points = " << n << "\n";
       std::cout << "Recursive algo time = " << t1 << "\n";
       std::cout << "Recursive optimized algo time = " << t2 << "\n";
